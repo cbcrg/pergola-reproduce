@@ -1,0 +1,51 @@
+#  Copyright (c) 2014-2017, Centre for Genomic Regulation (CRG).
+#  Copyright (c) 2014-2017, Jose Espinosa-Carrasco and the respective authors.
+#
+#  This file is part of Pergola.
+#
+#  Pergola is free software: you can redistribute it and/or modify
+#  it under the terms of the GNU General Public License as published by
+#  the Free Software Foundation, either version 3 of the License, or
+#  (at your option) any later version.
+#
+#  Pergola is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
+#
+#  You should have received a copy of the GNU General Public License
+#  along with Pergola.  If not, see <http://www.gnu.org/licenses/>.
+#
+################################################################
+# Dockerfile to build Pergola and all dependencies to reproduce 
+# pergola paper results
+################################################################
+
+FROM r-base:3.3.2 
+ 
+MAINTAINER Jose Espinosa-Carrasco <espinosacarrascoj@gmail.com>
+
+RUN apt-get update && apt-get install -y  \
+    sudo \
+    gdebi-core \
+    pandoc \
+    pandoc-citeproc \
+    libcurl4-gnutls-dev \
+    libcairo2-dev/unstable \
+    libxt-dev \
+    libssl-dev \
+    libxml2-dev \
+    python python-dev \
+    python-distribute \
+    python-pip  \
+    gfortran \ 
+    bedtools \
+    libhdf5-dev
+
+RUN R -e "install.packages(c('shiny', 'rmarkdown', 'ggplot2', 'XML', 'Rcurl','cowplot', 'dplyr', 'survival', 'gridExtra', 'devtools'), repos='http://cran.rstudio.com/')" \
+&& Rscript -e 'source("http://bioconductor.org/biocLite.R"); biocLite("GenomicRanges"); biocLite("rtracklayer");'
+
+## version of Gviz modified to show time instead of genomics units 
+RUN R -e  'devtools::install_github("JoseEspinosa/Gviz")'
+
+
