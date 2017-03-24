@@ -1,0 +1,3 @@
+[submodule "pergola"]
+	path = pergola
+	url = git@github.com:cbcrg/pergola.git
