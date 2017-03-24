@@ -48,4 +48,13 @@ RUN R -e "install.packages(c('shiny', 'rmarkdown', 'ggplot2', 'XML', 'Rcurl','co
 ## version of Gviz modified to show time instead of genomics units 
 RUN R -e  'devtools::install_github("JoseEspinosa/Gviz")'
 
+COPY pergola/pergola /pergola/pergola
+COPY pergola/requirements.txt /pergola/
+COPY pergola/setup.py /pergola/  
+COPY pergola/README.md /pergola/ 
 
+RUN pip install -r /pergola/requirements.txt && \
+    pip install cython && \
+    pip install h5py && \
+    apt-get install -y python-scipy && \
+    cd pergola && python setup.py install
