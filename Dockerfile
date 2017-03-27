@@ -25,6 +25,7 @@ FROM r-base:3.3.2
  
 MAINTAINER Jose Espinosa-Carrasco <espinosacarrascoj@gmail.com>
 
+## install dependencies
 RUN apt-get update && apt-get install -y  \
     sudo \
     gdebi-core \
@@ -42,12 +43,14 @@ RUN apt-get update && apt-get install -y  \
     bedtools \
     libhdf5-dev
 
+## intall R packages
 RUN R -e "install.packages(c('shiny', 'rmarkdown', 'ggplot2', 'XML', 'Rcurl','cowplot', 'dplyr', 'survival', 'gridExtra', 'devtools'), repos='http://cran.rstudio.com/')" \
 && Rscript -e 'source("http://bioconductor.org/biocLite.R"); biocLite("GenomicRanges"); biocLite("rtracklayer");'
 
 ## version of Gviz modified to show time instead of genomics units 
 RUN R -e  'devtools::install_github("JoseEspinosa/Gviz")'
 
+## pergola installation
 COPY pergola/pergola /pergola/pergola
 COPY pergola/requirements.txt /pergola/
 COPY pergola/setup.py /pergola/  
@@ -58,3 +61,4 @@ RUN pip install -r /pergola/requirements.txt && \
     pip install h5py && \
     apt-get install -y python-scipy && \
     cd pergola && python setup.py install
+
