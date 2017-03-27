@@ -35,4 +35,4 @@ vignettes/*.pdf
 
 # Nextflow files
 /celegans_n2_unc16/work
-/celegans_n2_unc16/.nextflow.log*
+/celegans_n2_unc16/.nextflow*

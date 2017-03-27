@@ -59,7 +59,7 @@ RUN pip install -r /pergola/requirements.txt && \
     apt-get install -y python-scipy && \
     cd pergola && python setup.py install
 
-## version of Gviz modified to show time instead of genomics units 
-RUN R -e  'devtools::install_github("JoseEspinosa/Gviz", ref = "fps")'
-# RUN R -e  'devtools::install_github("JoseEspinosa/Gviz", ref = "master")'
-
+# version of Gviz modified to show time instead of genomics units
+RUN R -e  'devtools::install_github("JoseEspinosa/Gviz")'
+## version of Gviz modified to show fps instead of genomics units 
+# RUN R -e  'devtools::install_github("JoseEspinosa/Gviz", ref = "fps")'
