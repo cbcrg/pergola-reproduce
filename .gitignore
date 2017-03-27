@@ -31,3 +31,8 @@ vignettes/*.pdf
 # Temporary files created by R markdown
 *.utf8.md
 *.knit.md
+.Rproj.user
+
+# Nextflow files
+/celegans_n2_unc16/work
+/celegans_n2_unc16/.nextflow.log*
