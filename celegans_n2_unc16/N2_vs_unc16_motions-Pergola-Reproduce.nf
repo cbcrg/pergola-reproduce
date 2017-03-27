@@ -29,11 +29,11 @@
  * TODO  explain what pergola does
  */    
 
-params.strain1_trackings = "$baseDir/data/unc16/*.mat"
-params.strain2_trackings = "$baseDir/data/N2/*.mat"
-params.mappings_speed    = "$baseDir/data/worms_speed2p.txt"
-params.mappings_bed      = "$baseDir/data/bed2pergola.txt"
-params.mappings_motion   = "$baseDir/data/worms_motion2p.txt"
+params.strain1_trackings = "$baseDir/small_data/unc_16/*.mat"
+params.strain2_trackings = "$baseDir/small_data/N2/*.mat"
+params.mappings_speed    = "$baseDir/small_data/mappings/worms_speed2p.txt"
+params.mappings_bed      = "$baseDir/small_data/mappings/bed2pergola.txt"
+params.mappings_motion   = "$baseDir/small_data/mappings/worms_motion2p.txt"
 
 params.output      = "results/"
 
@@ -460,7 +460,7 @@ process heat_and_density_plot {
 }
 
 //result_d.subscribe { println ("=========" + it) }	
-result_dir_heatmap = file("$baseDir/heatmap$tag_res")
+result_dir_heatmap = file("$baseDir/heatmap_$tag_res")
  
 result_dir_heatmap.with {
      if( !empty() ) { deleteDir() }
@@ -601,7 +601,7 @@ process plot_distro {
   	"""
 }
 
-result_dir_distro = file("$baseDir/plots_distro$tag_res")
+result_dir_distro = file("$baseDir/plots_distro_$tag_res")
  
 result_dir_distro.with {
      if( !empty() ) { deleteDir() }
