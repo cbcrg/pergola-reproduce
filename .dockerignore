@@ -1,0 +1,14 @@
+## ignore nextflow files produced by nextflow execution
+
+## cb1_mice
+cb1_mice/work/*
+cb1_mice/files/*.*
+
+## celegans
+celegans_n2_unc16/work/*
+
+# example delete
+# */temp*
+#    */*/temp*
+#    temp?
+#  celegans
