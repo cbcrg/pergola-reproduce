@@ -30,6 +30,13 @@ home <- Sys.getenv("HOME")
 ### Execution example
 ## Rscript density_heatmaps_tracking.R --files_str1="list_files_str1" --files_str2="list_files_str2"
 library(ggplot2)
+library("Biostrings")
+library("devtools")
+library("Gviz")
+
+## bedfiles to GRanges
+library("GenomicRanges")
+library("rtracklayer")
 
 # Loading params plot:
 source("https://raw.githubusercontent.com/cbcrg/mwm/master/lib/R/plot_param_public.R")
@@ -166,35 +173,9 @@ names (argsL) <- argsDF$V1
   }
 }
 
-library("Biostrings")
-library("devtools")
-
-## My modified version of Gviz for units
-## This work but I did have to modify the description S4Vectors (>= 0.8.11)
-## otherwise not working
-# devtools::install_github("JoseEspinosa/Gviz")
-library("Gviz")
-
-## bedfiles to GRanges
-library("GenomicRanges")
-library("rtracklayer")
-
 label_gr_2 <- "UNC-16"
 label_gr_2 <- "N2"
  
-# col_gr_1 <- "darkblue"
-# col_gr_2 <- "brown"
-# col_ctrl <- col_gr_1
-# col_case <- col_gr_2
-
-# label_gr_1 <- "Control"
-# label_gr_2 <- "HF"
-# col_gr_1 <- "darkblue"
-# col_gr_2 <- "brown"
-# col_ctrl <- col_gr_1
-# col_case <- col_gr_2
-# group_tr <- rep(c(label_gr_1, label_gr_2), each = 9) #del
-
 #############################
 ## Read files bedGraph files
 ctrl_worms.base <- path_str2
@@ -213,21 +194,12 @@ head (df_bedg_n2)
 n2_bedg_GR <- GRanges()
 n2_bedg_GR <- import(ctrl.worms.bedg.files [[1]], format = "bedGraph")
 mcols(n2_bedg_GR) <- df_bedg_n2
-# colnames(mcols(n2_bedg_GR)) <- paste("w", names(df_bedg_n2), sep="")
 
 ## Heatmap
-# all_bedg_dt_heatMap <- DataTrack(all_bedg_GR, name = "mean intake (mg)", type="heatmap", ylim = c(0, 0.2), 
-#                                  groups = group_tr_rev, col=c(col_case, col_ctrl), legend=FALSE)
 n2_bedg_dt_heatMap <- DataTrack(n2_bedg_GR, name = "midbody speed (microns/s)", type="heatmap", ylim=c(-400, 400), 
                                 gradient=c('blue', 'white','red'),
                                 #groups = group_tr_rev, col=c(col_case, col_ctrl), 
                                 legend=FALSE)
-
-### Plot track
-## c() because at_ctrl and at_case are already list
-# plotTracks (c(n2_bedg_dt_heatMap), 
-#             from=1, to=10000, shape = "box", #rot.title=0, stacking = "dense",# shows all events in same row
-#             showSampleNames = TRUE, cex.sampleNames = 0.6)# sample names in heatmap
 
 # Read unc16 data
 case_worms.base <- path_str1
@@ -267,46 +239,6 @@ n2_unc16_bedg_dt_heatMap <- DataTrack(n2_unc16_bedg_GR, name = "midbody speed (m
                                       type="heatmap", ylim=c(-400, 400),
                                       gradient=c('blue', 'white','red'))
 
-### Plot track
-# plotTracks(n2_unc16_bedg_dt_heatMap, from=1, to=20000,
-#            showSampleNames = TRUE, cex.sampleNames = 0.6)# sample names in heatmap
-
-##################
-## Create ideogram
-
-# initialize ideoTrack
-# ideoTrack <- IdeogramTrack(genome = "hg38",chromosome = "chr22")
-# # plotTracks(ideoTrack,from = 1,to = 1000)
-# 
-# # create self-genome and substitute values
-# ce_ideoTrack <- ideoTrack
-# 
-# START=c(1, 14001)
-# end_time <- 23000
-# END=c(14000, end_time)
-# 
-# RANGES <- GRanges(seqnames = c(letters[1:2]),IRanges(start =START ,end =END))
-# 
-# # Fake Giemsa staining
-# # GS <- c("gneg", NA)
-# # GS <- c(NA, NA)
-# GS <- c("gneg", "gneg")
-# 
-# # chromosome name
-# CHR <- "trajectory"
-# CHR <- "chr1"
-# bt <- data.frame(chrom=CHR, chromStart= c(1, 14001), chromEnd=c(12500, end_time),name=letters[1:2], gieStain=GS)
-# 
-# bt$name <- c(letters[1:2]) 
-# 
-# # Replace with your own data
-# ce_ideoTrack@range <- RANGES
-# ce_ideoTrack@chromosome <- CHR
-# ce_ideoTrack@name <- CHR
-# ce_ideoTrack@bandTable <- bt
-# 
-# # set UCSC chromosome Names False
-# options(ucscChromosomeNames=FALSE)
 gtrack <- GenomeAxisTrack()
 
 read_bed <- function (bed_file) {
@@ -347,17 +279,8 @@ plot_density <- function (df_str1_str2_filt, dir="for") {
   size_legend <- 8
   
   cbb_palette <- c("#000000", "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7")
-#   cbb_palette <- c("darkblue", "brown")
-#   cbb_palette <- c("brown", "darkblue")
   labs_plot <- as.vector(levels(df_str1_str2_filt$strain))
-  #   shift_axes <- 100
-  #   tick_interval <- 400
-  
-  #   shift_axes <- 100
-  #   tick_interval <- 400
-  #   xmin <- round(min (df_bed$value) - shift_axes, digits = -2)
-  #   xmax <- round(max (df_bed$value) + shift_axes, digits = -2)
-  
+ 
   if (dir == "back") {
     xmin <- -700
     xmax <- 30 
@@ -407,7 +330,7 @@ plot_str1_str2_paused <- plot_density (df_p_bed_filt, dir="paused")
 plot_str1_str2_back <- plot_density (df_b_bed_filt, dir="back")
 
 ###### Plotting
-tiff("heatmap_str1_str2.tiff")
+tiff("heatmap_str1_str2.tiff", width = 18 , height = 14, units = "cm", res=300)
 
 nrows <- 3
 ncols <- 3
@@ -416,7 +339,6 @@ pushViewport(viewport(layout=grid.layout(nrows, ncols)))
 pushViewport(viewport(layout.pos.col=1:3, 
                       layout.pos.row=1:2))
 
-# pt <- plotTracks(c(ce_ideoTrack, n2_unc16_bedg_dt_heatMap, gtrack), from=1, to=23000, col = NULL,
 pt <- plotTracks(c(n2_unc16_bedg_dt_heatMap, gtrack), from=1, to=23000, col = NULL,
                  #                  # yellow background
                  #                  background.title = "#4d4d4d", background.panel = "#FFFEDB",
@@ -430,4 +352,3 @@ print(plot_str1_str2_paused, vp = viewport(layout.pos.row = 3, layout.pos.col = 
 print(plot_str1_str2_back, vp = viewport(layout.pos.row = 3, layout.pos.col = 3))
 
 dev.off()
-
