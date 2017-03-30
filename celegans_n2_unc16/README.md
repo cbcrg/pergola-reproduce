@@ -2,10 +2,10 @@
 
 This repository contains the software, scripts and data to reproduce the results corresponding to the C.elegans data of the Pergola paper.
 
-If you have not install yet [docker](https://www.docker.com/) and [nextflow](https://www.nextflow.io/) and [nextflow](https://www.nextflow.io/), follow this [intructions](../README.md)
+If you have not install yet [docker](https://www.docker.com/) and [nextflow](https://www.nextflow.io/), follow this [intructions](../README.md)
 
 ## Pull docker image
-Pull the Docker images use for processing data with Pergola (Pergola and its dependencies installed)
+Pull the Docker image use for processing data with Pergola (Pergola and its dependencies installed)
 
 ```
 docker pull pergola/pergola@sha256:6d032d23fd90317ee3ac564497b1fd7f204ffc641ee009b937846fe7c959834f
@@ -29,7 +29,7 @@ wget -O- https://zenodo.org/record/400948/files/celegans_unc16_N2.tar.gz | tar x
 ```
 
 ## Run nextflow pipeline
-The pipeline will generate all the results.
+Once data is downloaded, it is possible to reproduce all the results using this command:
 
 ```
 NXF_VER=0.24.1 ./N2_vs_unc16_motions-Pergola-Reproduce.nf --strain1_trackings 'data/unc_16/*.mat' --strain2_trackings 'data/N2/*.mat' \
