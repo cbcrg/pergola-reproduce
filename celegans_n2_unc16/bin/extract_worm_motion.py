@@ -1,4 +1,29 @@
 #!/usr/bin/env python
+#  Copyright (c) 2014-2017, Centre for Genomic Regulation (CRG).
+#  Copyright (c) 2014-2017, Jose Espinosa-Carrasco and the respective authors.
+#
+#  This file is part of Pergola.
+#
+#  Pergola is free software: you can redistribute it and/or modify
+#  it under the terms of the GNU General Public License as published by
+#  the Free Software Foundation, either version 3 of the License, or
+#  (at your option) any later version.
+#
+#  Pergola is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
+#
+#  You should have received a copy of the GNU General Public License
+#  along with Pergola.  If not, see <http://www.gnu.org/licenses/>.
+#############################################################################
+### Jose Espinosa-Carrasco NPMMD/CB-CRG Group. May 2016                   ###
+#############################################################################
+### Reads mat lab files downloaded from the Wormbehavior DB               ###
+### (http://wormbehavior.mrc-lmb.cam.ac.uk/). Each file contains several  ###
+### features extracted from C.elegans video trackings.                    ### 
+### Read intervals of direction followed by the worn in space             ###
+#############################################################################
 
 # Loading libraries
 from argparse import ArgumentParser
@@ -21,8 +46,6 @@ print >> stderr, "Input file: %s" % args.input
 
 # Input files
 input_file =  args.input
-# input_file = "/Users/jespinosa/git/pergola/test/c_elegans_data_test/N2 on food L_2011_03_17__11_33_44___7___2_features.mat"
-# input_file = "/Users/jespinosa/git/pergola/test/c_elegans_data_test/575 JU440 on food L_2011_04_14__12_39_24___2___5_features.mat"
 file_name = basename(input_file).split('.')[0]
 file_name = file_name.replace (" ", "_")
 
@@ -75,24 +98,6 @@ frames = frames_r[0][0]
 fps_r = f['info']['video']['resolution']['fps']
 fps = fps_r[0][0]
 
-##############
-## WORM DATA
-# f['worm']['locomotion']['motion']['forward']['frames']['distance'][0][0]
-
-# motion (backward and forward)
-# forward
-# start_for_r = f['worm']['locomotion']['motion']['forward']['frames']['start']
-# end_for_r = f['worm']['locomotion']['motion']['forward']['frames']['end']
-
-# # backward
-# start_back_r = f['worm']['locomotion']['motion']['backward']['frames']['start']
-# end_back_r = f['worm']['locomotion']['motion']['backward']['frames']['end']
-
-# # paused
-# start_paused_r = f['worm']['locomotion']['motion']['paused']['frames']['start']
-# end_paused_r = f['worm']['locomotion']['motion']['paused']['frames']['end']
-
-# /worm/locomotion/turns/omegas/frames/start
 motion_keys = ['forward', 'backward', 'paused']
 
 def list_from_ref (refs_obj):
@@ -102,21 +107,6 @@ def list_from_ref (refs_obj):
         list_v.append(f[r[0]][0][0])   
 
     return (list_v)
-
-# debugging del
-# f['worm']['locomotion']['motion']['backward'].keys()
-# f['worm']['locomotion']['motion']['backward']['frames'].keys()
-# f['worm']['locomotion']['motion']['forward']['frames']['start']
-# f['worm']['locomotion']['motion']['forward']['frames']['end']
-
-# f['worm']['locomotion']['motion']['backward']['frames'][0]
-
-# start_r = f['worm']['locomotion']['motion']['forward']['frames']['start']
-# start_r = f['worm']['locomotion']['motion']['backward']['frames']['start']
-# start_r = f['worm']['locomotion']['motion']['paused']['frames']['start']
-
-# start = list_from_ref (start_r)
-# start
 
 for motion_k in sorted(motion_keys):
     try:

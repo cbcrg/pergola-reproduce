@@ -1,7 +1,7 @@
 #!/usr/bin/env Rscript
 
-#  Copyright (c) 2014-2016, Centre for Genomic Regulation (CRG).
-#  Copyright (c) 2014-2016, Jose Espinosa-Carrasco and the respective authors.
+#  Copyright (c) 2014-2017, Centre for Genomic Regulation (CRG).
+#  Copyright (c) 2014-2017, Jose Espinosa-Carrasco and the respective authors.
 #
 #  This file is part of Pergola.
 #
@@ -51,7 +51,7 @@ if("--help" %in% args) {
       
       Arguments:
       --bed_file_str1=bed_file_str1  - character  
-	  --bed_file_str2=bed_file_str2  - character  
+	    --bed_file_str2=bed_file_str2  - character  
       --help                         - print this text
       
       Example:

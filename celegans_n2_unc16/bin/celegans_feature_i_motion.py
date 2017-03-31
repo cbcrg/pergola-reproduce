@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
-#  Copyright (c) 2014-2016, Centre for Genomic Regulation (CRG).
-#  Copyright (c) 2014-2016, Jose Espinosa-Carrasco and the respective authors.
+#  Copyright (c) 2014-2017, Centre for Genomic Regulation (CRG).
+#  Copyright (c) 2014-2017, Jose Espinosa-Carrasco and the respective authors.
 #
 #  This file is part of Pergola.
 #
@@ -17,6 +17,13 @@
 #
 #  You should have received a copy of the GNU General Public License
 #  along with Pergola.  If not, see <http://www.gnu.org/licenses/>.
+#############################################################################
+### Jose Espinosa-Carrasco NPMMD/CB-CRG Group. May 2016                   ###
+#############################################################################
+### Intersect bed files containing the direction followed by the worm     ###
+### with the features extracted from the trajectory also in bed file using###
+### Pergola library and pybedtools                                        ###
+#############################################################################
 
 # example execution
 # ./celegans_speed_i_motion.py -p midbody.phenotypic_feature.bed -m motion.bed -b bed_map.txt -t "N2"
@@ -93,8 +100,6 @@ fh_bG.close()
 ## Generates a bed file of a single interval of the size of the whole bed file
 list_full_length = [(phenotypic_feature_bt[0]["chrom"], phenotypic_feature_bt[0]["start"], phenotypic_feature_bt[phenotypic_feature_bt.count() - 1]["end"], 0)]
 bed_full_length = pybedtools.BedTool(list_full_length)
-
-# print bed_full_length #del
 
 # Takes the bed file containing the phenotypic feature intersected with motion and uses pybedtools to calculate the mean 
 ph_feature_motion_bt = pybedtools.BedTool(tag_file + ".intersect.bed")
