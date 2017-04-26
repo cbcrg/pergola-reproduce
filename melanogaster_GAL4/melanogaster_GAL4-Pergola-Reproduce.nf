@@ -47,7 +47,7 @@ log.info "\n"
 //  -with-docker
 
 /*
-nextflow run drosophila_jaaba-Pergola-Reproduce.nf --scores='data/scores/*.mat' --var_dir='data/perframe/' --variables="velmag dtheta" --mappings='data/jaaba2pergola.txt'
+nextflow run melanogaster_GAL4-Pergola-Reproduce.nf --scores='data/scores/*.mat' --var_dir='data/perframe/' --variables="velmag dtheta" --mappings='data/jaaba2pergola.txt'
 
 */
 
