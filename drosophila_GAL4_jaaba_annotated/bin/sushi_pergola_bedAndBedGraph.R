@@ -91,7 +91,7 @@ names (argsL) <- argsDF$V1
     if (is.null (argsL$variable_name)) 
     {
         print ("[WARNING]: Variable to plot is set to \"default=Speed\"\n")
-        variable_name <- "Speed"
+        variable_name <- "velmag"
     }
     else
     {        
@@ -106,9 +106,7 @@ library('Sushi')
 library(gtools) #mixedsort
 
 base_folder <- path2bed_files
-# base_folder <- "/Users/jespinosa/2017_sushi_pergola/data"
 chase.bed.files <- mixedsort(list.files(base_folder, pattern="tr.*.bed$", full.names=TRUE))
-# pattern=paste("mean_value_.*", variable, ".comp.txt$", sep="")
 data_bed <- lapply(chase.bed.files, function (bed, dir=direction) { 
     name_id <- gsub("tr_", "", gsub("_dt_chase.bed", "", basename(bed)))
     bed_tbl <- read.csv(file=bed, header=FALSE, sep="\t", stringsAsFactors=FALSE)
@@ -127,12 +125,11 @@ data_bed.df$color <- sapply(strsplit(as.character(data_bed.df$V9), ","), functio
 
 ##############################
 ## bedgraph row measures files
-# jaaba_to_pergola fp -i "/Users/jespinosa/JAABA_MAC_0.5.1/sampledata_v0.5/Chase1_TrpA_Rig1Plate15BowlA_20120404T141155/perframe/" -jf velmag dtheta  -m "/Users/jespinosa/git/pergola/test/jaaba2pergola.txt" -dd /Users/jespinosa/2017_sushi_pergola/data/ -f bedGraph -nt 
 base_folder <- path2bedg_files
-chase.bedgraph.velmag.files <- mixedsort(list.files(base_folder, pattern="tr.*velmag*.bedGraph$", full.names=TRUE))
+chase.bedgraph.variable.files <- mixedsort(list.files(base_folder, pattern=paste("tr.*", variable_name, "*.bedGraph$", sep=""), full.names=TRUE))
 
-data_bedgraph_velmag <- lapply(chase.bedgraph.velmag.files, function (bedg) { 
-    name_id <- gsub("tr_", "", gsub("_dt_velmag.bedGraph", "", basename(bedg)))
+data_bedgraph_variable <- lapply(chase.bedgraph.variable.files, function (bedg) { 
+    name_id <- gsub("tr_", "", gsub(paste("_dt_", variable_name, ".bedGraph", sep=""), "", basename(bedg)))
     bedg_tbl <- read.csv(file=bedg, header=FALSE, sep="\t", stringsAsFactors=FALSE)
     bedg_tbl$name <- as.numeric(name_id)
     return (bedg_tbl)
@@ -144,13 +141,13 @@ chromend         = 25000
 
 title <- paste("  ", variable_name, sep="")
 
-png("sushi_jaaba_scores_annot.png")
+png(paste("sushi_jaaba_scores_annot_", variable_name, ".png", sep=""))
 
 split.screen (c(2, 1)) 
 
 ## adding a n empty plots for title
 n=3
-split.screen(c(length(data_bedgraph_velmag)+n, 1), screen = 1)
+split.screen(c(length(data_bedgraph_variable)+n, 1), screen = 1)
 
 screen(1)
 
@@ -163,7 +160,7 @@ labelplot("A ", title, letteradj=-.025)
 i=3+n
 j=1
 
-for (bedg in data_bedgraph_velmag) {
+for (bedg in data_bedgraph_variable) {
     screen( i )
     par(mar=c(0.1,1,0.1,0.1))
     plotBedgraph(bedg, chrom, chromstart, chromend, transparency=.50,

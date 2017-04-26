@@ -47,15 +47,7 @@ log.info "\n"
 //  -with-docker
 
 /*
-nextflow run drosophila_jaaba-Pergola-Reproduce.nf --scores='/Users/jespinosa/2017_sushi_pergola/data/drosophila_jaaba/scores/*.mat' \
-                                                   --var_dir='/Users/jespinosa/2017_sushi_pergola/data/drosophila_jaaba/perframe/' \
-                                                   --variables="velmag dtheta" \
-                                                   --mappings='/Users/jespinosa/2017_sushi_pergola/lib/nxf/data/jaaba2pergola.txt'
-
-nextflow run drosophila_jaaba-Pergola-Reproduce.nf --scores='/Users/jespinosa/2017_sushi_pergola/data/drosophila_jaaba/scores/*.mat' \
-                                                   --var_dir='/Users/jespinosa/2017_sushi_pergola/data/drosophila_jaaba/perframe/' \
-                                                   --variables="velmag" \
-                                                   --mappings='/Users/jespinosa/2017_sushi_pergola/lib/nxf/data/jaaba2pergola.txt'
+nextflow run drosophila_jaaba-Pergola-Reproduce.nf --scores='data/scores/*.mat' --var_dir='data/perframe/' --variables="velmag dtheta" --mappings='data/jaaba2pergola.txt'
 
 */
 
@@ -95,21 +87,6 @@ variable_dir = file( params.var_dir )
 variables_list = params.variables.split(" ")
                   //.println (  )
 
-
- /*
-Channel
-	.fromPath( params.variables )
-    .ifEmpty { error "Cannot find any mat file with Jaaba derived variables from flies trajectory" }
-	.set { variables_files }
-
-variables_files_tag = variables_files.map {
-	def content = it
-	def name = it.name.split("\\.")[0]
-	//println ">>>>>>>>>>>>>>>>>>" + name
-	[ content, name ]
-}
-*/
-
 process scores_to_bed {
     input:
     set file (scores), val (annotated_behavior) from score_files_tag_bed
@@ -124,8 +101,6 @@ process scores_to_bed {
     mv *.bed results_score/
     """
 }
-
-// jaaba_to_pergola fp -i "/Users/jespinosa/JAABA_MAC_0.5.1/sampledata_v0.5/Chase1_TrpA_Rig1Plate15BowlA_20120404T141155/perframe/" -jf velmag dtheta  -m "/Users/jespinosa/git/pergola/test/jaaba2pergola.txt" -dd /Users/jespinosa/2017_sushi_pergola/data/ -f bedGraph -nt
 
 process variables_to_bedGraph {
     input:
@@ -145,14 +120,14 @@ process variables_to_bedGraph {
 
 process sushi_plot {
     input:
-    file scores_bed_dir from results_bed_score
     set var_bedg_dir, var from results_bedg_var
+    file scores_bed_dir from results_bed_score.first()    
 
     output:
-    file 'sushi_jaaba_scores_annot.png' into sushi_plot
+    file "sushi_jaaba_scores_annot_${var}.png" into sushi_plot
 
     """
-    sushi_pergola_bedAndBedGraph.R --path2variables=${var_bedg_dir} --path2scores=${scores_bed_dir} --var_name=${var}
+    sushi_pergola_bedAndBedGraph.R --path2variables=${var_bedg_dir} --path2scores=${scores_bed_dir} --variable_name=${var}
     """
 }
 
