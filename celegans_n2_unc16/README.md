@@ -1,6 +1,6 @@
 # N2_vs_unc16_motions-Pergola-Reproduce.nf
 
-This repository contains the software, scripts and data to reproduce the results corresponding to the C.elegans data of the Pergola paper.
+This repository contains the software, scripts and data to reproduce the results corresponding to the *C.elegans* data of the Pergola paper.
 
 If you have not install yet [docker](https://www.docker.com/) and [nextflow](https://www.nextflow.io/), follow this [intructions](../README.md)
 

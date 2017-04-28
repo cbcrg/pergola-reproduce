@@ -6,7 +6,7 @@ This repository contains the software, scripts and data to reproduce the results
 
 * To reproduce *M. musculus* *(mice) results go to [cb1_mice](cb1_mice/README.md) 
 
-* `TODO` To reproduce *D. melanogaster* results go to [melanogaster](melanogaster/README.md)
+* To reproduce *D. melanogaster* results go to [melanogaster](melanogaster_GAL4/README.md)
 
 
 In order to avoid any possible problem reproducing the results we recommend to install [docker](https://www.docker.com/) following the instructions on this [link](https://docs.docker.com/engine/installation/). Using the images we built guarantees that all the processes runs exactly in the same system environment and using the same software and libraries versions, you can read more about it [here](https://peerj.com/articles/1273/).
