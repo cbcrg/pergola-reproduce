@@ -156,8 +156,25 @@ process sign_variable_annotation {
 
     output:
     file "${var}.png"
+    set stdout into FC_pvalue
 
     """
     ttest_var_annotated_jaaba.R --path2files=${dir_annot_vs_non_annot} --variable_name=${var}
     """
+}
+
+FC_pvalues_collected = FC_pvalue
+                        .collectFile(name: 'FC_pvalue.csv', newLine: false)
+
+process plot_volcano {
+    input:
+    file pvalues_FC from FC_pvalues_collected
+
+    output:
+    file 'volcano_plot.png'
+
+    """
+    volcano_plot_jaaba.R --path2file=${pvalues_FC}
+    """
+
 }

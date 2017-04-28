@@ -37,7 +37,7 @@ if ( length(args) < 1) {
 ## Help section
 if("--help" %in% args) {
     cat("
-        sushi_plot_jaaba
+        ttest_var_annotated_jaaba
         
         Arguments:
         --path2files=someValue     - character, path to read bedGraph files        
@@ -72,18 +72,6 @@ names (argsL) <- argsDF$V1
         path2files <- argsL$path2files
     }
 }
-
-# path to score bed files
-# {
-#     if (is.null (argsL$path2scores)) 
-#     {
-#         stop ("[FATAL]: Path to files score bed files is mandatory")
-#     }
-#     else
-#     {
-#         path2bed_files <- argsL$path2scores
-#     }
-# }
 
 # variable name
 {
@@ -125,8 +113,7 @@ files_annotated <- list.files(path=path2files, pattern=paste("values_.*", variab
 
 data_bed <- lapply(files_annotated, read.csv, header=FALSE, sep="\t", stringsAsFactors=FALSE)
 data_bed.df <- do.call(rbind, data_bed)
-# head(data_bed.df)
-# data_bed.df$V10
+
 v_annotated <- abs(as.numeric(unlist(strsplit(data_bed.df$V10, ","))))
 
 files_annotated_comp <- list.files(path=path2files, pattern=paste("values_.*", variable, ".comp.txt$", sep=""), full.names = TRUE)
@@ -136,10 +123,17 @@ data_bed_comp.df <- do.call(rbind, data_bed_comp)
 
 v_no_annotated <- abs(as.numeric(unlist(strsplit(data_bed_comp.df$V4, ","))))
 
-# length(v_annotated)
-# length(v_no_annotated)
 t_result <- t.test(v_annotated, v_no_annotated)
 
+## Fold change calculation
+# to avoid zeros I substitute 0 values by the mean of the values
+v_annotated[v_annotated==0] <- mean(v_annotated)
+v_no_annotated[v_no_annotated==0] <- mean(v_no_annotated)
+
+log2FoldChange = mean(log2(v_annotated)) - mean(log2(v_no_annotated))
+vector_FC <- c(variable, log2FoldChange, t_result$p.value)
+M_t_vector_FC <- as.matrix(t(vector_FC))
+write.table(M_t_vector_FC, stdout(), sep="\t", col.names=FALSE, row.names=FALSE)
 
 ## bar plot group comparison
 group <- c(rep("Annotated", length (v_annotated)), rep("No annotated", length (v_no_annotated)))
@@ -147,6 +141,7 @@ df_values <- data.frame(id = group, value = c(v_annotated, v_no_annotated))
 
 ## outliers out 
 ylim1 = boxplot.stats(df_values$value)$stats[c(1, 5)]
+
 ## colors
 cbb_palette <- c("#E69F00", "#000000", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7")
 name_out <- paste (variable, ".", "png", sep="")
