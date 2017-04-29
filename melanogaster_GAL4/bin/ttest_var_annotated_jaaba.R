@@ -107,7 +107,7 @@ variable <- variable_name
 # variable <- "phi"
 # variable <- "dell2nose"
 # variable <- "angle2wall"
-path2files <- "/Users/jespinosa/2017_sushi_pergola/lib/python"
+# path2files <- "/Users/jespinosa/2017_sushi_pergola/lib/python"
 # path2files <- "/Users/jespinosa/2017_sushi_pergola/lib/nxf/work/e0/2887dcdce79d24a889eac82aa20699/results_annot"
 files_annotated <- list.files(path=path2files, pattern=paste("values_.*", variable, ".txt$", sep=""), full.names = TRUE)
 
@@ -121,7 +121,7 @@ data_bed_comp <- lapply(files_annotated_comp, read.csv, header=FALSE, sep="\t", 
 
 data_bed_comp.df <- do.call(rbind, data_bed_comp)
 
-v_no_annotated <- abs(as.numeric(unlist(strsplit(data_bed_comp.df$V4, ","))))
+v_no_annotated <- abs(as.numeric(unlist(strsplit(as.character(data_bed_comp.df$V4), ","))))
 
 t_result <- t.test(v_annotated, v_no_annotated)
 
