@@ -107,14 +107,14 @@ variable <- variable_name
 # variable <- "phi"
 # variable <- "dell2nose"
 # variable <- "angle2wall"
-# path2files <- "/Users/jespinosa/2017_sushi_pergola/lib/python"
+path2files <- "/Users/jespinosa/2017_sushi_pergola/lib/python"
 # path2files <- "/Users/jespinosa/2017_sushi_pergola/lib/nxf/work/e0/2887dcdce79d24a889eac82aa20699/results_annot"
 files_annotated <- list.files(path=path2files, pattern=paste("values_.*", variable, ".txt$", sep=""), full.names = TRUE)
 
 data_bed <- lapply(files_annotated, read.csv, header=FALSE, sep="\t", stringsAsFactors=FALSE)
 data_bed.df <- do.call(rbind, data_bed)
 
-v_annotated <- abs(as.numeric(unlist(strsplit(data_bed.df$V10, ","))))
+v_annotated <- abs(as.numeric(unlist(strsplit(as.character(data_bed.df$V10), ","))))
 
 files_annotated_comp <- list.files(path=path2files, pattern=paste("values_.*", variable, ".comp.txt$", sep=""), full.names = TRUE)
 data_bed_comp <- lapply(files_annotated_comp, read.csv, header=FALSE, sep="\t", stringsAsFactors=FALSE)
