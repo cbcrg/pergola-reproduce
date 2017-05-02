@@ -46,6 +46,9 @@ log.info "\n"
 //  --variables='data/perframe/*.mat' \
 //  -with-docker
 
+// Extract all names of variables from a folder to pass them as arguments
+// for f in *.mat; do     printf '%s ' "${f%.mat}"; done
+
 /*
 nextflow run melanogaster_GAL4-Pergola-Reproduce.nf --scores='data/scores/*.mat' --var_dir='data/perframe/' --variables="velmag dtheta" --mappings='data/jaaba2pergola.txt'
 
@@ -104,7 +107,7 @@ process scores_to_bed {
 
 process variables_to_bedGraph {
     input:
-    val variable_d from variable_dir
+    file (variable_d) from variable_dir
     each var from variables_list
     file mapping_file
 
