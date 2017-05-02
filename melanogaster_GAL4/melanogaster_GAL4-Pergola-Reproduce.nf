@@ -80,9 +80,11 @@ score_files_tag.into { score_files_tag_bed; score_files_tag_comp }
 /*
  * Create a channel for directory containing variables
  */
-variable_dir = file( params.var_dir )
-//variable_dir = Channel.fromPath( params.var_dir )
+//variable_dir = file( params.var_dir )
+variable_dir = Channel.fromPath( params.var_dir )
                       //.println ()
+
+variable_dir.into { variable_dir_bg; variable_dir_scores }
 
 /*
  * Variable list to extract from the folder
@@ -107,7 +109,7 @@ process scores_to_bed {
 
 process variables_to_bedGraph {
     input:
-    file (variable_d) from variable_dir
+    set file ('variable_d') from variable_dir_bg.first()
     each var from variables_list
     file mapping_file
 
@@ -138,7 +140,7 @@ process jaaba_scores_vs_variables {
 
   	input:
   	set file (scores), val (annotated_behavior) from score_files_tag_comp
-  	val variable_d from variable_dir
+  	set file ('variable_d') from variable_dir_scores
   	each var from variables_list
     file mapping_file
 
