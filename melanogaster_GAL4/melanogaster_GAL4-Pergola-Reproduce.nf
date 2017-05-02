@@ -140,7 +140,7 @@ process jaaba_scores_vs_variables {
     file mapping_file
 
   	output:
-  	set 'results_annot', var into annot_vs_non_annot_result
+  	set file('results_annot'), var into annot_vs_non_annot_result
 
   	"""
   	jaaba_scores_vs_variables.py -s ${scores} -t ${annotated_behavior} -d ${variable_d} -v ${var} -m  ${mapping_file}
@@ -152,7 +152,7 @@ process jaaba_scores_vs_variables {
 
 process sign_variable_annotation {
     input:
-    set dir_annot_vs_non_annot, var from annot_vs_non_annot_result
+    set file(dir_annot_vs_non_annot), var from annot_vs_non_annot_result
 
     output:
     file "${var}.png"
