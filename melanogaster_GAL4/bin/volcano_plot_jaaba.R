@@ -75,8 +75,12 @@ names (argsL) <- argsDF$V1
 fc_pvalue <- read.table(path2file, header=FALSE)
 colnames(fc_pvalue) <- c("variable", "log2FoldChange", "pvalue")
 
-png(paste("volcano_plot", ".png", sep=""))
-# with(res, plot(log2FoldChange, -log10(pvalue), pch=20, main="Volcano plot", xlim=c(-2.5,2)))
-with(fc_pvalue, plot(log2FoldChange, -log10(pvalue), pch=20, main="Volcano plot"))
+## Filtering extreme values for plotting name
+interesting_p_fc <- subset (fc_pvalue, abs(log2FoldChange) > 0.3)
+interesting_p_pv <- subset (fc_pvalue, & -log10(pvalue) > 50)
 
+png(paste("volcano_plot", ".png", sep=""))
+with(fc_pvalue, plot(log2FoldChange, -log10(pvalue), pch=20, main="Volcano plot"))
+with(interesting_p_fc, text(log2FoldChange, -log10(pvalue), variable, cex=0.6, pos=4, col="red"))
+with(interesting_p_pv, text(log2FoldChange, -log10(pvalue), variable, cex=0.6, pos=4, col="red"))
 dev.off()
