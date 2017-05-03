@@ -176,7 +176,8 @@ process plot_volcano {
     file pvalues_FC from FC_pvalues_collected
 
     output:
-    file 'volcano_plot.png'
+    file "*.png"
+    file 'tbl_fc_pvalues.txt'
 
     """
     volcano_plot_jaaba.R --path2file=${pvalues_FC}
