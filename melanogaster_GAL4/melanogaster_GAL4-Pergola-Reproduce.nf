@@ -98,7 +98,7 @@ process scores_to_bed {
     file mapping_file
 
     output:
-    file 'results_score' into results_bed_score
+    file 'results_score' into results_bed_score, results_bed_score_2
 
     """
     jaaba_to_pergola sp -i ${scores} -m ${mapping_file} -f bed -bl -nt
@@ -146,13 +146,29 @@ process jaaba_scores_vs_variables {
 
   	output:
   	set file('results_annot'), var into annot_vs_non_annot_result
+    set file('results_bedGr'), var into bedGr_to_sushi
 
   	"""
   	jaaba_scores_vs_variables.py -s ${scores} -t ${annotated_behavior} -d ${variable_d} -v ${var} -m  ${mapping_file}
   	mkdir results_annot
-  	mv *.txt  results_annot/
+  	mkdir results_bedGr
 
+  	mv *.txt  results_annot/
+    mv *.bedGraph results_bedGr/
   	"""
+}
+
+process sushi_plot_highlight {
+    input:
+    set file ('bedGr_dir'), var from bedGr_to_sushi
+    file scores_bed_dir from results_bed_score_2.first()
+
+    output:
+    file "sushi_jaaba_scores_annot_highlight${var}.png" into sushi_plot2
+
+    """
+    sushi_pergola_bedAndBedGraph_highlight.R --path2variables=${bedGr_dir} --path2scores=${scores_bed_dir} --variable_name=${var}
+    """
 }
 
 process sign_variable_annotation {

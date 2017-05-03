@@ -26,11 +26,12 @@
 ### Then uses R for compare means                                        ###
 ############################################################################
 
-from argparse import ArgumentParser
-from sys      import stderr
-from os.path  import dirname, abspath, basename, splitext
-from tempfile import NamedTemporaryFile
-from pergola  import parsers, jaaba_parsers, mapping, intervals
+from argparse   import ArgumentParser
+from sys        import stderr
+from os.path    import dirname, abspath, basename, splitext
+from tempfile   import NamedTemporaryFile
+from pergola    import parsers, jaaba_parsers, mapping, intervals
+from pybedtools import BedTool
 
 parser = ArgumentParser(description='File input arguments')
 parser.add_argument('-s','--score_file', help='Jaaba file containing scores annotated for a given behavior', required=True)
@@ -94,12 +95,17 @@ statistic="distinct"
 
 dict_bedGraph_var = jaaba_parsers.extract_jaaba_features(dir_perframe=path_var_jaaba, map_jaaba=args.mapping_file, delimiter="\t",
                                                              feature=var_traj, output="IntData").read().convert(mode="bedGraph", window=1)
+
+list_no_intervals = [("chr1", 0, 1, 0)]
+
 for tr, bedGraph_var in dict_bedGraph_var.iteritems():
 
     id_worm, var = tr
 
     bedGraph_var_bt = bedGraph_var.create_pybedtools()
 
+    ## only if the track has annotations it is possible to map annotations into the variable
+    ## generates a bedGraph with the variable values intersecting annotations if possible and those out of annotations
     if (id_worm, annotated_type) in bed_annotated_int:
 
         bed_annotated_int_bt = bed_annotated_int[(id_worm, annotated_type)].create_pybedtools()
@@ -110,3 +116,20 @@ for tr, bedGraph_var in dict_bedGraph_var.iteritems():
 
             bed_annotated_int_bt.map(bedGraph_var_bt, c=4, o=statistic, null=0).saveas('values_' + id_worm + '_' + var_traj + '.txt')
             bed_annotated_int_comp.map(bedGraph_var_bt, c=4, o=statistic, null=0).saveas('values_' + id_worm + '_' + var_traj + '.comp.txt')
+
+            bedGraph_var_bt.intersect(bed_annotated_int_bt).saveas('values_' + id_worm + '_' + var_traj + '.bedGraph')
+            bedGraph_var_bt.intersect(bed_annotated_int_comp).saveas('values_' + id_worm + '_' + var_traj + '.comp.bedGraph')
+
+            # bedGraph_var_bt.(bed_annotated_int_bt).saveas('values_' + id_worm + '_' + var_traj + '.comp.bedGraph')
+            #
+            # .intersect(motion_bt).saveas(tag_file + ".intersect.bed")
+            #
+            # bed_annotated_int_bt.intersect()
+            # (bedGraph_var_bt, c=4, o=statistic, null=0).saveas('values_' + id_worm + '_' + var_traj + '.txt')
+            # bed_annotated_int_comp.map(bedGraph_var_bt, c=4, o=statistic, null=0).saveas('values_' + id_worm + '_' + var_traj + '.comp.txt')
+
+    ## if no annotations present then returns bedGraph for its plotting and and empty bedgraph for annotated regions
+    else:
+        bedGraph_var_bt.saveas('values_' + id_worm + '_' + var_traj + '.comp.bedGraph')
+        bed_no_intervals = BedTool(list_no_intervals).saveas('values_' + id_worm + '_' + var_traj + '.bedGraph')
+
