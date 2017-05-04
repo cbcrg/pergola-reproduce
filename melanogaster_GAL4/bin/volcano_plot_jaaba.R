@@ -72,9 +72,16 @@ names (argsL) <- argsDF$V1
   }
 }
 
-fc_pvalue <- read.table(path2file, header=FALSE)
-colnames(fc_pvalue) <- c("variable", "log2FoldChange", "pvalue")
+## Loading libraries
+library("ggplot2")
+library("ggrepel")
 
+fc_pvalue <- read.table(path2file, header=FALSE)
+## example for dev
+# fc_pvalue <- read.table("/Users/jespinosa/git/pergola-paper-reproduce/melanogaster_GAL4/data/volcano_example_data.txt",header=TRUE)
+
+colnames(fc_pvalue) <- c("variable", "log2FoldChange", "pvalue")
+fc_pvalue <- head(fc_pvalue,200)
 ## Filtering extreme values for plotting name
 interesting_p_fc_pos <- subset (fc_pvalue, log2FoldChange > 0.3)
 interesting_p_fc_neg <- subset (fc_pvalue, log2FoldChange < -0.18)
@@ -99,3 +106,15 @@ dev.off()
 
 fc_pvalue$pvalue <- -log10(fc_pvalue$pvalue)
 write.table(fc_pvalue, "tbl_fc_pvalues.txt", sep="\t", col.names=TRUE, row.names=FALSE) 
+
+fc_pvalue$highlight <- ifelse(abs(fc_pvalue$log2FoldChange) > 0.2 | -log10(fc_pvalue$pvalue) > 40, "red", "black") 
+
+volcano_ggplot <- ggplot(fc_pvalue) +                  
+                  geom_point(aes(x=log2FoldChange, y=-log10(pvalue), color=highlight)) +                  
+                  scale_color_manual(values=c('red','black'))+
+                  geom_text_repel(aes(log2FoldChange, -log10(pvalue), label = variable)) +
+                  theme_classic(base_size = 16) +
+                  theme(legend.position="none")
+    
+
+ggsave (volcano_ggplot, file=paste("volcano_plot_labels", ".png", sep=""))
