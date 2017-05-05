@@ -164,7 +164,7 @@ process sushi_plot_highlight {
     file scores_bed_dir from results_bed_score_2.first()
 
     output:
-    file "sushi_jaaba_scores_annot_highlight${var}.png" into sushi_plot2
+    file "*.png" into sushi_plot2
 
     """
     sushi_pergola_bedAndBedGraph_highlight.R --path2variables=${bedGr_dir} --path2scores=${scores_bed_dir} --variable_name=${var}
