@@ -78,7 +78,7 @@ source("https://bioconductor.org/biocLite.R")
 library('Sushi')
 library(gtools) #mixedsort
 
-path2bed_files <- "/Users/jespinosa/git/pergola-paper-reproduce/melanogaster_GAL4/results/results_score/"
+# path2bed_files <- "/Users/jespinosa/git/pergola-paper-reproduce/melanogaster_GAL4/results/results_score/"
 base_folder <- path2bed_files
 chase.bed.files <- mixedsort(list.files(base_folder, pattern="tr.*.bed$", full.names=TRUE))
 data_bed <- lapply(chase.bed.files, function (bed, dir=direction) { 

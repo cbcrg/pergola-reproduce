@@ -128,7 +128,7 @@ data_bed.df$color <- sapply(strsplit(as.character(data_bed.df$V9), ","), functio
 # path2bedg_files <- "/Users/jespinosa/git/pergola-paper-reproduce/melanogaster_GAL4/work/9a/9fb318fa4479947951624eb14d7cc8/results_annot/"
 # variable_name <- "velmag"
 base_folder <- path2bedg_files
-chase.bedgraph.variable.files <- mixedsort(list.files(base_folder, pattern=paste("values.*", variable_name, "*.bedGraph$", sep=""), full.names=TRUE))
+chase.bedgraph.variable.files <- mixedsort(list.files(base_folder, pattern=paste("values.*", variable_name, ".bedGraph$", sep=""), full.names=TRUE))
 chase.bedgraph.variable.files.comp <- mixedsort(list.files(base_folder, pattern=paste("values.*", variable_name, "*.comp.*.bedGraph$", sep=""), full.names=TRUE))
 
 data_bedgraph_variable <- lapply(chase.bedgraph.variable.files, function (bedg) { 
