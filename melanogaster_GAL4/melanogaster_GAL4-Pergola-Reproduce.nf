@@ -52,6 +52,12 @@ log.info "\n"
 /*
 nextflow run melanogaster_GAL4-Pergola-Reproduce.nf --scores='data/scores/*.mat' --var_dir='data/perframe/' --variables="velmag dtheta" --mappings='data/jaaba2pergola.txt'
 
+// This variables are droped because it has not mean the comparison:
+// x x_mm y y_mm coordinates of the fly position
+
+nextflow run melanogaster_GAL4-Pergola-Reproduce.nf --scores='data/scores/scores_20170504.mat' --var_dir='/users/cn/jespinosa/jaaba_data/perframe/' --variables="a a_mm absangle2wall absanglefrom1to2_anglesub absanglefrom1to2_nose2ell absdangle2wall absdtheta absdv_cor absphidiff_anglesub absphidiff_nose2ell abssmoothdtheta absthetadiff_anglesub absthetadiff_nose2ell absyaw accmag angle2wall anglefrom1to2_anglesub anglefrom1to2_nose2ell angleonclosestfly anglesub area areasmooth arena_angle arena_r b b_mm closestfly_anglesub closestfly_center closestfly_ell2nose closestfly_nose2ell closestfly_nose2ell_angle_30tomin30 closestfly_nose2ell_angle_min20to20 closestfly_nose2ell_angle_min30to30 closestfly_nose2tail corfrac_maj corfrac_min da dangle2wall danglesub darea db dcenter ddcenter ddell2nose ddist2wall ddnose2ell decc dell2nose dist2wall dnose2ell dnose2ell_angle_30tomin30 dnose2ell_angle_min20to20 dnose2ell_angle_min30to30 dnose2tail dphi dt dtheta du_cor du_ctr du_tail dv_cor dv_ctr dv_tail ecc flipdv_cor magveldiff_anglesub magveldiff_nose2ell phi phisideways signdtheta smoothdtheta theta theta_mm timestamps velmag velmag_ctr velmag_nose velmag_tail veltoward_anglesub veltoward_nose2ell xnose_mm  yaw ynose_mm" --mappings='data/jaaba2pergola.txt' -profile crg -with-docker -bg -resume
+
+
 */
 
 /*
@@ -158,10 +164,11 @@ process jaaba_scores_vs_variables {
   	"""
 }
 
-process sushi_plot_highlight {
+/*
+process sushi_plot_highlight_bg {
     input:
     set file ('bedGr_dir'), var from bedGr_to_sushi
-    file scores_bed_dir from results_bed_score_2.first()
+    //file scores_bed_dir from results_bed_score_2.first()
 
     output:
     file "*.png" into sushi_plot2
@@ -170,13 +177,38 @@ process sushi_plot_highlight {
     sushi_pergola_bedAndBedGraph_highlight.R --path2variables=${bedGr_dir} --path2scores=${scores_bed_dir} --variable_name=${var}
     """
 }
+*/
+
+process sushi_plot_highlight_bg {
+    input:
+    set file ('bedGr_dir'), var from bedGr_to_sushi
+
+    output:
+    file "*.pdf" into sushi_plot2
+
+    """
+    sushi_pergola_BedGraph_highlight.R --path2variables=${bedGr_dir} --variable_name=${var}
+    """
+}
+
+process sushi_plot_behavior_annot {
+    input:
+    file scores_bed_dir from results_bed_score_2.first()
+
+    output:
+    file "*.pdf" into sushi_plot_annot
+
+    """
+    sushi_pergola_bed.R --path2scores=${scores_bed_dir}
+    """
+}
 
 process sign_variable_annotation {
     input:
     set file(dir_annot_vs_non_annot), var from annot_vs_non_annot_result
 
     output:
-    file "${var}.png"
+    file "${var}.pdf"
     set stdout into FC_pvalue
 
     """
@@ -192,7 +224,7 @@ process plot_volcano {
     file pvalues_FC from FC_pvalues_collected
 
     output:
-    file "*.png"
+    file "*.pdf"
     file 'tbl_fc_pvalues.txt'
 
     """

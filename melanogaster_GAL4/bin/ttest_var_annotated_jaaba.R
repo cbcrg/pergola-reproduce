@@ -144,7 +144,8 @@ ylim1 = boxplot.stats(df_values$value)$stats[c(1, 5)]
 
 ## colors
 cbb_palette <- c("#E69F00", "#000000", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7")
-name_out <- paste (variable, ".", "png", sep="")
+# name_out <- paste (variable, ".", "png", sep="")
+name_out <- paste (variable, ".", "pdf", sep="")
 
 ggplot(df_values, aes(id, value, fill=id)) + geom_boxplot() + 
     labs (title = "Jaaba annotated vs. non-annotated intervals\n", 
