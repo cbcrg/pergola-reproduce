@@ -132,7 +132,7 @@ chromend         = 25000
 # title <- paste("  ", variable_name, sep="")
 
 # png(paste("sushi_highlight", variable_name, ".png", sep=""))
-pdf ( paste("sushi_highlight", variable_name, ".pdf", sep="") , height=10, width=12)
+pdf ( paste("sushi_highlight", variable_name, ".pdf", sep="") , height=10, width=20)
 
 # split.screen (c(2, 1)) 
 
