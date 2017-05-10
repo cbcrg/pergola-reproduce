@@ -144,7 +144,10 @@ group <- c(rep("Annotated", length (v_annotated)), rep("No annotated", length (v
 df_values <- data.frame(id = group, value = c(v_annotated, v_no_annotated))
 
 ## outliers out 
-ylim1 = boxplot.stats(df_values$value)$stats[c(1, 5)]
+## by group, otherwise sometimes the whole boxplot is shown
+ylim_a = boxplot.stats(df_values$value[df_values$id=="Annotated"])$stats[c(1, 5)]
+ylim_no_a = boxplot.stats(df_values$value[df_values$id=="No annotated"])$stats[c(1, 5)]
+ylim1 <- c(min(ylim_a, ylim_no_a), max(ylim_a, ylim_no_a))
 
 ## colors
 cbb_palette <- c("#E69F00", "#000000", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7")
@@ -159,6 +162,7 @@ ggplot(df_values, aes(id, value, fill=id)) + geom_boxplot() +
     theme(legend.position="none") +
     # outliers out
     coord_cartesian(ylim = ylim1*1.05) +
-    annotate("text", x=2.3, y=ylim1[2], label=paste("p-value=", signif (t_result$p.value,3)))
+    annotate("text", x=2.3, y=ylim1[2], label=paste("p-value=", signif (t_result$p.value,3))) +
+    geom_segment (aes(x = 1.63, y = median(df_values$value[df_values$id=="No annotated"]), xend = 2.37, yend = median(df_values$value[df_values$id=="No annotated"]), colour="white"))
 
 ggsave (file=name_out)
