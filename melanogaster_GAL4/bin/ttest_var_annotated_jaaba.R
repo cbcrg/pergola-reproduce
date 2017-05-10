@@ -102,19 +102,20 @@ variable <- variable_name
 ## I should take into account also the tracks without any annotation
 ## as for instances bed 1
 
-# variable <- "velmag_tail"
+# variable <- "velmag"
 # variable <- "dtheta"
 # variable <- "phi"
 # variable <- "dell2nose"
 # variable <- "angle2wall"
-# path2files <- "/Users/jespinosa/2017_sushi_pergola/lib/python"
-# path2files <- "/Users/jespinosa/2017_sushi_pergola/lib/nxf/work/e0/2887dcdce79d24a889eac82aa20699/results_annot"
+
+# path2files <- "/Users/jespinosa/git/pergola-paper-reproduce/melanogaster_GAL4/results/results_annot"
 files_annotated <- list.files(path=path2files, pattern=paste("values_.*", variable, ".txt$", sep=""), full.names = TRUE)
 
 data_bed <- lapply(files_annotated, read.csv, header=FALSE, sep="\t", stringsAsFactors=FALSE)
 data_bed.df <- do.call(rbind, data_bed)
 
 v_annotated <- abs(as.numeric(unlist(strsplit(as.character(data_bed.df$V10), ","))))
+# v_annotated <- as.numeric(unlist(strsplit(as.character(data_bed.df$V10), ",")))
 
 files_annotated_comp <- list.files(path=path2files, pattern=paste("values_.*", variable, ".comp.txt$", sep=""), full.names = TRUE)
 data_bed_comp <- lapply(files_annotated_comp, read.csv, header=FALSE, sep="\t", stringsAsFactors=FALSE)
@@ -122,8 +123,11 @@ data_bed_comp <- lapply(files_annotated_comp, read.csv, header=FALSE, sep="\t", 
 data_bed_comp.df <- do.call(rbind, data_bed_comp)
 
 v_no_annotated <- abs(as.numeric(unlist(strsplit(as.character(data_bed_comp.df$V4), ","))))
+# v_no_annotated <- as.numeric(unlist(strsplit(as.character(data_bed_comp.df$V4), ",")))
 
 t_result <- t.test(v_annotated, v_no_annotated)
+
+### HACER EL TTEST DESPUES DE SUBSTITUIR?
 
 ## Fold change calculation
 # to avoid zeros I substitute 0 values by the mean of the values

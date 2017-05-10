@@ -97,47 +97,12 @@ data_bed.df$color <- sapply(strsplit(as.character(data_bed.df$V9), ","), functio
   rgb(x[1], x[2], x[3], m=255)
 })   
 
-# ##############################
-# ## bedgraph row measures files
-# # path2bedg_files <- "/Users/jespinosa/git/pergola-paper-reproduce/melanogaster_GAL4/results/results_bedGr/"
-# # variable_name <- "velmag"
-# base_folder <- path2bedg_files
-# chase.bedgraph.variable.files <- mixedsort(list.files(base_folder, pattern=paste("values.*", variable_name, "*.bedGraph$", sep=""), full.names=TRUE))
-# chase.bedgraph.variable.files.comp <- mixedsort(list.files(base_folder, pattern=paste("values.*", variable_name, "*.comp.*.bedGraph$", sep=""), full.names=TRUE))
-# 
-# min_bedGraph <- 0
-# max_bedGraph <- -100000
-# 
-# round_up <- function(x,to=10) {
-#   to*(x%/%to + as.logical(x%%to))
-# }
-# 
-# data_bedgraph_variable <- lapply(chase.bedgraph.variable.files, function (bedg) { 
-#   name_id <- gsub("values_", "", gsub(paste("_", variable_name, ".bedGraph", sep=""), "", basename(bedg)))  
-#   bedg_tbl <- read.csv(file=bedg, header=FALSE, sep="\t", stringsAsFactors=FALSE)
-#   min_bedGraph <<- round(floor(min (min_bedGraph, min(bedg_tbl$V4))),-1)
-#   max_bedGraph <<- round_up(max (max_bedGraph, max(bedg_tbl$V4)), 5)
-#   bedg_tbl$name <- as.numeric(name_id)
-#   return (bedg_tbl)
-# })
-# 
-# data_bedgraph_variable_comp <- lapply(chase.bedgraph.variable.files.comp, function (bedg) { 
-#   name_id <- gsub("values_", "", gsub(paste("_", variable_name, ".comp.bedGraph", sep=""), "", basename(bedg)))
-#   bedg_tbl <- read.csv(file=bedg, header=FALSE, sep="\t", stringsAsFactors=FALSE)
-#   bedg_tbl$name <- as.numeric(name_id)
-#   min_bedGraph <<- round(floor(min (min_bedGraph, min(bedg_tbl$V4))),-1)
-#   max_bedGraph <<- round_up(max (max_bedGraph, max(bedg_tbl$V4)), 5)
-#   return (bedg_tbl)
-# })
-
 chrom            = "chr1"
 chromstart       = 0
 chromend         = 25000
 
-# title <- paste("  ", variable_name, sep="")
-
 # png(paste("sushi_jaaba_annot", ".png", sep=""))
-pdf ( paste("sushi_jaaba_annot", ".pdf", sep="") , height=10, width=12)
+pdf ( paste("sushi_jaaba_annot", ".pdf", sep="") , height=10, width=20)
 
 # par(mar=c(0.1,1,2,0.1))
 par(mar=c(1, 2, 1, 2))
@@ -147,9 +112,8 @@ plotBed (beddata = data_bed.df, chrom = chrom,
          rownumber  = data_bed.df$row, type = "region",
          color = data_bed.df$color, row ="given",
          plotbg ="grey95", rowlabels = rev(unique(data_bed.df$name)),
-         rowlabelcol = unique(data_bed.df$color), rowlabelcex = 0.75)
+         rowlabelcol = unique(data_bed.df$color), rowlabelcex = 1)
 #rowlabelcex = 0.75)
 # labelplot("B ","  Chase", letteradj=-.025)
 
 dev.off()
-

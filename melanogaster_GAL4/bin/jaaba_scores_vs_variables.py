@@ -91,7 +91,8 @@ bed_annotated_int = scores_chase_int.convert(mode="bed")
 
 dict_bedGraph_features = dict()
 # statistic="mean"
-statistic="distinct"
+# statistic="distinct"
+statistic="collapse"
 
 dict_bedGraph_var = jaaba_parsers.extract_jaaba_features(dir_perframe=path_var_jaaba, map_jaaba=args.mapping_file, delimiter="\t",
                                                              feature=var_traj, output="IntData").read().convert(mode="bedGraph", window=1)
