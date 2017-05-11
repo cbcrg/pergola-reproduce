@@ -154,9 +154,13 @@ cbb_palette <- c("#E69F00", "#000000", "#56B4E9", "#009E73", "#F0E442", "#0072B2
 # name_out <- paste (variable, ".", "png", sep="")
 name_out <- paste (variable, ".", "pdf", sep="")
 
+df_values [df_values$value > 100,]
+
 ggplot(df_values, aes(id, value, fill=id)) + geom_boxplot() + 
-    labs (title = "Jaaba annotated vs. non-annotated intervals\n", 
-          y = paste(variable, "\n", sep=""), x = "\nGroup") +
+#     labs (#title = "Jaaba annotated vs. non-annotated intervals\n", 
+#           y = paste(variable, "\n", sep=""), x = "\nGroup") +  
+    labs (#title = "Jaaba annotated vs. non-annotated intervals\n", 
+          y = paste("", "\n", sep=""), x = "\n") +  
     theme(plot.title = element_text(hjust = 0.5)) +
     scale_fill_manual(values = cbb_palette) +
     theme(legend.position="none") +
