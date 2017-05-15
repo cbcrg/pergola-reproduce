@@ -155,7 +155,7 @@ cbb_palette <- c("#0072B2", "#D55E00", "#E69F00", "#000000", "#56B4E9", "#009E73
 # name_out <- paste (variable, ".", "png", sep="")
 name_out <- paste (variable, ".", "pdf", sep="")
 
-df_values [df_values$value > 100,]
+# df_values [df_values$value > 100,]
 
 ggplot(df_values, aes(id, value, fill=id)) + geom_boxplot(notch=TRUE) + 
 #     labs (#title = "Jaaba annotated vs. non-annotated intervals\n", 
