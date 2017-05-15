@@ -140,7 +140,7 @@ M_t_vector_FC <- as.matrix(t(vector_FC))
 write.table(M_t_vector_FC, stdout(), sep="\t", col.names=FALSE, row.names=FALSE)
 
 ## bar plot group comparison
-group <- c(rep("Annotated", length (v_annotated)), rep("No annotated", length (v_no_annotated)))
+group <- c(rep("Chase annotated", length (v_annotated)), rep("No annotated", length (v_no_annotated)))
 df_values <- data.frame(id = group, value = c(v_annotated, v_no_annotated))
 
 ## outliers out 
@@ -150,13 +150,14 @@ ylim_no_a = boxplot.stats(df_values$value[df_values$id=="No annotated"])$stats[c
 ylim1 <- c(min(ylim_a, ylim_no_a), max(ylim_a, ylim_no_a))
 
 ## colors
-cbb_palette <- c("#E69F00", "#000000", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7")
+cbb_palette <- c("#0072B2", "#D55E00", "#E69F00", "#000000", "#56B4E9", "#009E73", "#F0E442", "#CC79A7")
+
 # name_out <- paste (variable, ".", "png", sep="")
 name_out <- paste (variable, ".", "pdf", sep="")
 
 df_values [df_values$value > 100,]
 
-ggplot(df_values, aes(id, value, fill=id)) + geom_boxplot() + 
+ggplot(df_values, aes(id, value, fill=id)) + geom_boxplot(notch=TRUE) + 
 #     labs (#title = "Jaaba annotated vs. non-annotated intervals\n", 
 #           y = paste(variable, "\n", sep=""), x = "\nGroup") +  
     labs (#title = "Jaaba annotated vs. non-annotated intervals\n", 
@@ -166,7 +167,7 @@ ggplot(df_values, aes(id, value, fill=id)) + geom_boxplot() +
     theme(legend.position="none") +
     # outliers out
     coord_cartesian(ylim = ylim1*1.05) +
-    annotate("text", x=2.3, y=ylim1[2], label=paste("p-value=", signif (t_result$p.value,3))) +
-    geom_segment (aes(x = 1.63, y = median(df_values$value[df_values$id=="No annotated"]), xend = 2.37, yend = median(df_values$value[df_values$id=="No annotated"]), colour="white"))
+    annotate("text", x=2.3, y=ylim1[2], label=paste("p-value=", signif (t_result$p.value,3))) #+
+#     geom_segment (aes(x = 1.63, y = median(df_values$value[df_values$id=="No annotated"]), xend = 2.37, yend = median(df_values$value[df_values$id=="No annotated"]), colour="white"))
 
 ggsave (file=name_out)

@@ -75,8 +75,9 @@ names (argsL) <- argsDF$V1
 ## Loading libraries
 library("ggplot2")
 library("ggrepel")
-
+# path2file <- "/Users/jespinosa/git/pergola-paper-reproduce/melanogaster_GAL4/tbl_fc_pvalues.txt"
 fc_pvalue <- read.table(path2file, header=FALSE)
+# fc_pvalue <- read.table(path2file, header=TRUE)
 
 colnames (fc_pvalue) <- c("variable", "log2FoldChange", "pvalue")
 max_y <- max (fc_pvalue$log2FoldChange)
@@ -99,14 +100,13 @@ dev.off()
 
 # png(paste("volcano_plot_pos", ".png", sep=""))
 pdf ( paste("volcano_plot_pos", ".pdf", sep=""), height=10, width=12)
-
 with(interesting_p_fc_pos, plot(log2FoldChange, -log10(pvalue), xlim=c(0.4, max_y), pch=20))
 with(interesting_p_fc_pos, text(log2FoldChange, -log10(pvalue), variable, cex=0.8, pos=4, col="red"))
 dev.off()
 
 volcano_ggplot_pos <- ggplot(interesting_p_fc_pos) +                  
                       geom_point(aes(x=log2FoldChange, y=-log10(pvalue), color=highlight)) +                  
-                      scale_color_manual(values=c('red','black'))+
+                      scale_color_manual(values=c('red','black')) +
                       geom_text_repel(aes(log2FoldChange, -log10(pvalue), label = variable)) +
                       theme_classic(base_size = 16) +
                       theme(legend.position="none")
@@ -130,7 +130,8 @@ ggsave (volcano_ggplot_neg, file=paste("volcano_plot_labels_neg", ".pdf", sep=""
 
 velmag <- fc_pvalue [fc_pvalue$variable == "velmag",]
 
-fc_pvalue_int <- fc_pvalue [abs(fc_pvalue$log2FoldChange) > 0.2 & -log10(fc_pvalue$pvalue) > 40, ]
+# fc_pvalue_int <- fc_pvalue [abs(fc_pvalue$log2FoldChange) > 0.2 & -log10(fc_pvalue$pvalue) > 40, ]
+fc_pvalue_int <- fc_pvalue [abs(fc_pvalue$log2FoldChange) > 0.8 & -log10(fc_pvalue$pvalue) > 40, ]
 
 volcano_ggplot <- ggplot(fc_pvalue) +                  
                   geom_point(aes(x=log2FoldChange, y=-log10(pvalue), color=highlight)) +                  

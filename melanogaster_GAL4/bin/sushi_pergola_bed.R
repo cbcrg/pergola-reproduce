@@ -112,7 +112,8 @@ plotBed (beddata = data_bed.df, chrom = chrom,
          rownumber  = data_bed.df$row, type = "region",
          color = data_bed.df$color, row ="given",
          plotbg ="grey95", rowlabels = rev(unique(data_bed.df$name)),
-         rowlabelcol = unique(data_bed.df$color), rowlabelcex = 1)
+#          rowlabelcol = unique(data_bed.df$color), rowlabelcex = 1)
+         rowlabelcol = "black", rowlabelcex = 1)
 #rowlabelcex = 0.75)
 # labelplot("B ","  Chase", letteradj=-.025)
 
