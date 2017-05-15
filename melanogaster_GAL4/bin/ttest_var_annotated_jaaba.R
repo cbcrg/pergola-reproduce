@@ -145,7 +145,7 @@ df_values <- data.frame(id = group, value = c(v_annotated, v_no_annotated))
 
 ## outliers out 
 ## by group, otherwise sometimes the whole boxplot is shown
-ylim_a = boxplot.stats(df_values$value[df_values$id=="Annotated"])$stats[c(1, 5)]
+ylim_a = boxplot.stats(df_values$value[df_values$id=="Chase annotated"])$stats[c(1, 5)]
 ylim_no_a = boxplot.stats(df_values$value[df_values$id=="No annotated"])$stats[c(1, 5)]
 ylim1 <- c(min(ylim_a, ylim_no_a), max(ylim_a, ylim_no_a))
 
