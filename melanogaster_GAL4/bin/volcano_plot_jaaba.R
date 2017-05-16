@@ -76,6 +76,7 @@ names (argsL) <- argsDF$V1
 library("ggplot2")
 library("ggrepel")
 # path2file <- "/Users/jespinosa/git/pergola-paper-reproduce/melanogaster_GAL4/tbl_fc_pvalues.txt"
+path2file <- "/Users/jespinosa/git/pergola-paper-reproduce/melanogaster_GAL4/work/tmp/47/4f551680f997b88521c0bb56392fe1/FC_pvalue.csv"
 fc_pvalue <- read.table(path2file, header=FALSE)
 # fc_pvalue <- read.table(path2file, header=TRUE)
 
@@ -100,9 +101,12 @@ dev.off()
 
 # png(paste("volcano_plot_pos", ".png", sep=""))
 pdf ( paste("volcano_plot_pos", ".pdf", sep=""), height=10, width=12)
+
+if (nrow(interesting_p_fc_pos) != 0) {
 with(interesting_p_fc_pos, plot(log2FoldChange, -log10(pvalue), xlim=c(0.4, max_y), pch=20))
 with(interesting_p_fc_pos, text(log2FoldChange, -log10(pvalue), variable, cex=0.8, pos=4, col="red"))
 dev.off()
+}
 
 volcano_ggplot_pos <- ggplot(interesting_p_fc_pos) +                  
                       geom_point(aes(x=log2FoldChange, y=-log10(pvalue), color=highlight)) +                  
@@ -115,9 +119,11 @@ ggsave (volcano_ggplot_pos, file=paste("volcano_plot_labels_pos", ".png", sep=""
 # png(paste("volcano_plot_neg", ".png", sep=""))
 pdf(paste("volcano_plot_neg", ".pdf", sep=""), height=10, width=12)
 
+if (nrow(interesting_p_fc_neg) != 0) {
 with(interesting_p_fc_neg, plot(log2FoldChange, -log10(pvalue), xlim=c(-0.42,-0.18), pch=20))
 with(interesting_p_fc_neg, text(log2FoldChange, -log10(pvalue), variable, cex=0.8, pos=4, col="red"))
 dev.off()
+}
 
 volcano_ggplot_neg <- ggplot(interesting_p_fc_neg) +                  
   geom_point(aes(x=log2FoldChange, y=-log10(pvalue), color=highlight)) +                  
