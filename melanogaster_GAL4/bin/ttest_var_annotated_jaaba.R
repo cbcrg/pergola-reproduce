@@ -150,7 +150,7 @@ ylim_no_a = boxplot.stats(df_values$value[df_values$id=="No annotated"])$stats[c
 ylim1 <- c(min(ylim_a, ylim_no_a), max(ylim_a, ylim_no_a))
 
 ## colors
-cbb_palette <- c("#0072B2", "#D55E00", "#E69F00", "#000000", "#56B4E9", "#009E73", "#F0E442", "#CC79A7")
+cbb_palette <- c("#D55E00", "#0072B2", "#E69F00", "#000000", "#56B4E9", "#009E73", "#F0E442", "#CC79A7")
 
 # name_out <- paste (variable, ".", "png", sep="")
 name_out <- paste (variable, ".", "pdf", sep="")
