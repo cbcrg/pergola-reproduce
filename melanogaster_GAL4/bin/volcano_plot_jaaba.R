@@ -135,7 +135,8 @@ ggsave (volcano_ggplot_neg, file=paste("volcano_plot_labels_neg", ".pdf", sep=""
 velmag <- fc_pvalue [fc_pvalue$variable == "velmag",]
 
 # fc_pvalue_int <- fc_pvalue [abs(fc_pvalue$log2FoldChange) > 0.2 & -log10(fc_pvalue$pvalue) > 40, ]
-fc_pvalue_int <- fc_pvalue [abs(fc_pvalue$log2FoldChange) > 0.8 & -log10(fc_pvalue$pvalue) > 40, ]
+# fc_pvalue_int <- fc_pvalue [abs(fc_pvalue$log2FoldChange) > 0.8 & -log10(fc_pvalue$pvalue) > 40, ]
+fc_pvalue_int <- fc_pvalue [abs(fc_pvalue$log2FoldChange) > 0.4 & -log10(fc_pvalue$pvalue) > 55, ]
 
 volcano_ggplot <- ggplot(fc_pvalue) +                  
                   geom_point(aes(x=log2FoldChange, y=-log10(pvalue), color=highlight)) +                  
@@ -146,10 +147,23 @@ volcano_ggplot <- ggplot(fc_pvalue) +
 #                   geom_text_repel(data=velmag, aes(log2FoldChange, -log10(pvalue), label = variable)) +
                   theme_classic(base_size = 16) +
                   theme(legend.position="none") +
-                  xlim(c(-1,1.6))
+#                   xlim(c(-1,1.6))
+                  xlim(c(-0.5,1.5))
 
 # ggsave (volcano_ggplot, file=paste("volcano_plot_labels", ".png", sep=""))
 ggsave (volcano_ggplot, file=paste("volcano_plot_labels", ".pdf", sep=""))
+
+fc_pvalue_int <- fc_pvalue [abs(fc_pvalue$log2FoldChange) > 0.8 & -log10(fc_pvalue$pvalue) > 80, ]
+
+volcano_ggplot <- ggplot(fc_pvalue) +                  
+  geom_point(aes(x=log2FoldChange, y=-log10(pvalue), color=highlight)) +                  
+  scale_color_manual(values=c('red','black'))+
+  geom_text_repel(data=fc_pvalue_int, aes(log2FoldChange, -log10(pvalue), label = variable)) +
+  theme_classic(base_size = 16) +
+  theme(legend.position="none") +
+  xlim(c(-0.5,1.5))
+
+ggsave (volcano_ggplot, file=paste("volcano_plot_stringent_threshold", ".pdf", sep=""))
 
 fc_pvalue$pvalue <- -log10(fc_pvalue$pvalue)
 write.table(fc_pvalue, "tbl_fc_pvalues.txt", sep="\t", col.names=TRUE, row.names=FALSE) 

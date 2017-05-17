@@ -23,7 +23,7 @@
 /*
  * Jose Espinosa-Carrasco. CB-CRG. March 2017
  *
- * Script to reproduce Pergola paper figures
+ * Script to reproduce Pergola paper Jaaba annotated data analysis
  */
 
 params.scores      = "$baseDir/data/scores/.mat"
@@ -41,23 +41,13 @@ log.info "output                 : ${params.output}"
 log.info "\n"
 
 // Example command to run the script
-//nextflow run drosophila_jaaba-Pergola-Reproduce.nf \
-//	--scores='data/scores/*.mat' \
-//  --variables='data/perframe/*.mat' \
-//  -with-docker
-
-// Extract all names of variables from a folder to pass them as arguments
-// for f in *.mat; do     printf '%s ' "${f%.mat}"; done
-
 /*
-nextflow run melanogaster_GAL4-Pergola-Reproduce.nf --scores='data/scores/*.mat' --var_dir='data/perframe/' --variables="velmag dtheta" --mappings='data/jaaba2pergola.txt'
-
-// This variables are droped because it has not mean the comparison:
-// x x_mm y y_mm coordinates of the fly position
-
-nextflow run melanogaster_GAL4-Pergola-Reproduce.nf --scores='data/scores/scores_20170504.mat' --var_dir='/users/cn/jespinosa/jaaba_data/perframe/' --variables="a absangle2wall absanglefrom1to2_anglesub absanglefrom1to2_nose2ell absdangle2wall absdtheta absdv_cor absphidiff_anglesub absphidiff_nose2ell abssmoothdtheta absthetadiff_anglesub absthetadiff_nose2ell absyaw accmag angle2wall anglefrom1to2_anglesub anglefrom1to2_nose2ell angleonclosestfly anglesub area areasmooth arena_angle arena_r b closestfly_anglesub closestfly_center closestfly_ell2nose closestfly_nose2ell closestfly_nose2ell_angle_30tomin30 closestfly_nose2ell_angle_min20to20 closestfly_nose2ell_angle_min30to30 closestfly_nose2tail corfrac_maj corfrac_min da dangle2wall danglesub darea db dcenter ddcenter ddell2nose ddist2wall ddnose2ell decc dell2nose dist2wall dnose2ell dnose2ell_angle_30tomin30 dnose2ell_angle_min20to20 dnose2ell_angle_min30to30 dnose2tail dphi dt dtheta du_cor du_ctr du_tail dv_cor dv_ctr dv_tail ecc flipdv_cor magveldiff_anglesub magveldiff_nose2ell phi phisideways signdtheta smoothdtheta theta theta_mm timestamps velmag velmag_ctr velmag_nose velmag_tail veltoward_anglesub veltoward_nose2ell xnose_mm  yaw ynose_mm" --mappings='data/jaaba2pergola.txt' -profile crg -with-docker -bg -resume
-
-
+nextflow run melanogaster_GAL4-Pergola-Reproduce.nf \
+	--scores='small_data/scores/scores_chase.mat' \
+  --var_dir='small_data/perframe/' \
+  --variables="dnose2ell dtheta velmag" \
+  --mappings='small_data/jaaba2pergola.txt' \
+  -with-docker
 */
 
 /*
@@ -77,7 +67,6 @@ Channel
 score_files_tag = score_files.map {
 	def content = it
 	def name = it.name.replaceAll('scores_',' ').split("\\.")[0]
-	//println ">>>>>>>>>>>>>>>>>>" + name
 	[ content, name ]
 }
 
@@ -86,7 +75,6 @@ score_files_tag.into { score_files_tag_bed; score_files_tag_comp }
 /*
  * Create a channel for directory containing variables
  */
-//variable_dir = file( params.var_dir )
 variable_dir = Channel.fromPath( params.var_dir )
                       //.println ()
 
@@ -95,8 +83,7 @@ variable_dir.into { variable_dir_bg; variable_dir_scores }
 /*
  * Variable list to extract from the folder
  */
-variables_list = params.variables.split(" ")
-                  //.println (  )
+variables_list = params.variables.split(" ")                 
 
 process scores_to_bed {
     input:
@@ -115,7 +102,7 @@ process scores_to_bed {
 
 process variables_to_bedGraph {
     input:
-    set file ('variable_d') from variable_dir_bg.first()
+    file ('variable_d') from variable_dir_bg.first()
     each var from variables_list
     file mapping_file
 
@@ -129,6 +116,9 @@ process variables_to_bedGraph {
     """
 }
 
+/*
+The resulting plot is not used by the moment in the paper, eventually delete
+*/
 process sushi_plot {
     input:
     set var_bedg_dir, var from results_bedg_var
@@ -146,7 +136,7 @@ process jaaba_scores_vs_variables {
 
   	input:
   	set file (scores), val (annotated_behavior) from score_files_tag_comp
-  	set file ('variable_d') from variable_dir_scores
+  	file ('variable_d') from variable_dir_scores
   	each var from variables_list
     file mapping_file
 
@@ -163,21 +153,6 @@ process jaaba_scores_vs_variables {
     mv *.bedGraph results_bedGr/
   	"""
 }
-
-/*
-process sushi_plot_highlight_bg {
-    input:
-    set file (bedGr_dir), var from bedGr_to_sushi
-    //file scores_bed_dir from results_bed_score_2.first()
-
-    output:
-    file "*.png" into sushi_plot2
-
-    """
-    sushi_pergola_bedAndBedGraph_highlight.R --path2variables=${bedGr_dir} --path2scores=${scores_bed_dir} --variable_name=${var}
-    """
-}
-*/
 
 process sushi_plot_highlight_bg {
     input:
@@ -209,7 +184,7 @@ process sign_variable_annotation {
 
     output:
     file "${var}.pdf"
-    set stdout into FC_pvalue
+    stdout into FC_pvalue
 
     """
     ttest_var_annotated_jaaba.R --path2files=${dir_annot_vs_non_annot} --variable_name=${var}
