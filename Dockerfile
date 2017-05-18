@@ -44,7 +44,7 @@ RUN apt-get update && apt-get install -y  \
     libhdf5-dev
 
 ## intall R packages
-RUN R -e "install.packages(c('shiny', 'rmarkdown', 'ggplot2', 'XML', 'Rcurl','cowplot', 'dplyr', 'survival', 'gridExtra', 'devtools', 'utils', 'gutils', 'gtools'), repos='http://cran.rstudio.com/')" \
+RUN R -e "install.packages(c('shiny', 'rmarkdown', 'ggplot2', 'XML', 'Rcurl','cowplot', 'dplyr', 'survival', 'gridExtra', 'devtools', 'utils', 'gutils', 'gtools', 'ggrepel'), repos='http://cran.rstudio.com/')" \
 && Rscript -e 'source("http://bioconductor.org/biocLite.R"); biocLite("GenomicRanges"); biocLite("rtracklayer"); biocLite("Sushi");'
 
 ## pergola installation
@@ -63,5 +63,3 @@ RUN pip install -r /pergola/requirements.txt && \
 RUN R -e  'devtools::install_github("JoseEspinosa/Gviz")'
 ## version of Gviz modified to show fps instead of genomics units 
 # RUN R -e  'devtools::install_github("JoseEspinosa/Gviz", ref = "fps")'
-
-RUN R -e "install.packages(c('ggrepel'), repos='http://cran.rstudio.com/')"
