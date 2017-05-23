@@ -33,8 +33,8 @@ params.strain2_trackings = "$baseDir/small_data/N2/*.mat"
 params.mappings_speed    = "$baseDir/small_data/mappings/worms_speed2p.txt"
 params.mappings_bed      = "$baseDir/small_data/mappings/bed2pergola.txt"
 params.mappings_motion   = "$baseDir/small_data/mappings/worms_motion2p.txt"
-
-params.output      = "results/"
+params.output            = "results/"
+params.tag_results       = ""
 
 log.info "C. elegans locomotion phenotypes comparison - N F  ~  version 0.1"
 log.info "========================================================="
@@ -44,13 +44,14 @@ log.info "mappings speed              : ${params.mappings_speed}"
 log.info "mappings bed                : ${params.mappings_bed}"
 log.info "mappings motion             : ${params.mappings_motion}"
 log.info "output                      : ${params.output}"
+log.info "tag results                 : ${params.tag_results}"
 log.info "\n"
 
 /*
-./N2_vs_unc16_motions-Pergola-Reproduce.nf --strain1_trackings 'data/unc_16/*.mat' --strain2_trackings 'data/N2/*.mat' \
-	--mappings_speed 'data/mappings/worms_speed2p.txt' \
-	--mappings_bed 'data/mappings/bed2pergola.txt' \
-	--mappings_motion data/mappings/worms_motion2p.txt \
+./N2_vs_unc16_motions-Pergola-Reproduce.nf --strain1_trackings 'small_data/unc_16/*.mat' --strain2_trackings 'small_data/N2/*.mat' \
+	--mappings_speed 'small_data/mappings/worms_speed2p.txt' \
+	--mappings_bed 'small_data/mappings/bed2pergola.txt' \
+	--mappings_motion small_data/mappings/worms_motion2p.txt \
 	-with-docker -resume
 */
 
@@ -90,7 +91,9 @@ Channel
     .ifEmpty { error "Missing mapping file: ${map_motion}" }
 	  .set { map_bed }
 
-params.tag_results = "tag"
+/*
+ * Read tag for results if exists 
+ */
 tag_res = "${params.tag_results}"
 tag_str1 = "strain1_worms"
 tag_str2 = "strain2_worms"
@@ -150,7 +153,7 @@ process feature_to_pergola {
   
   	output: 
   	set '*.no_na.bed', body_part, name_file into bed_loc_no_nas
-  	set '*.no_na.bedGraph', body_part, name_file into bedGraph_loc_no_nas
+  	set '*.zeros.bedGraph', body_part, name_file into bedGraph_loc_no_nas
   	set '*.no_tr.bedGraph', body_part, name_file into bedGraph_heatmap
   	
   	set name_file, body_part, '*.no_tr.bed', exp_group into bed_loc_no_track_line, bed_loc_no_track_line_cp
@@ -175,8 +178,8 @@ process feature_to_pergola {
   	rm bed_file.tmp
   	
   	# delete values that were assigned as -10000 to skip na of the original file
-  	# to avoid problems if a file got a feature with a feature always set to NA I add this code (short files for examples)
-  	# cat bedGraph_file.tmp | grep -v "\\-10000" > ${name_file}".no_na.bedGraph"
+  	# to avoid problems if a file got a feature with a feature always set to NA I add this code (short files for 
+  	cat bedGraph_file.tmp | sed 's/-10000/0/g' > ${name_file}".zeros.bedGraph"
   	cat bedGraph_file.tmp > ${name_file}".no_na.bedGraph"  
   	cat ${name_file}".no_na.bedGraph" | grep -v "track name" > ${name_file}".no_tr.bedGraph" || echo -e echo -e "chr1\t0\t100\t1" > ${name_file}".no_tr.bedGraph"
   	rm bedGraph_file.tmp 
@@ -411,7 +414,7 @@ process heat_and_density_plot {
   	"""
 }
 
-result_dir_heatmap = file("$baseDir/heatmap_$tag_res")
+result_dir_heatmap = file("$baseDir/heatmap$tag_res")
  
 result_dir_heatmap.with {
     if( !empty() ) { deleteDir() }
@@ -483,7 +486,7 @@ process plot_distro {
 longest_fasta = out_fasta     
                    .max { it.size() }
 
-result_dir_distro = file("$baseDir/plots_distro_$tag_res")
+result_dir_distro = file("$baseDir/plots_distro$tag_res")
  
 result_dir_distro.with {
     if( !empty() ) { deleteDir() }
@@ -498,7 +501,7 @@ plots_pheno_feature_str1_str2.subscribe {
 /*
  * Creating folder to keep all files for data visualization on IGV
  */
-result_dir_IGV = file("results_IGV_$tag_res")
+result_dir_IGV = file("results_IGV$tag_res")
 
 result_dir_IGV.with {
     if( !empty() ) { deleteDir() }
@@ -507,12 +510,12 @@ result_dir_IGV.with {
 } 
 
 longest_fasta.subscribe { 
-    fasta_file = it[0]
-    fasta_file.copyTo ( result_dir_IGV.resolve ( it[2] + ".fa" ) )
+    fasta_file = it[0]    
+    fasta_file.copyTo ( result_dir_IGV.resolve ( "celegans.fa" ) )
 }
 
 /*
-result_dir_bed = file("results_bed_$tag_res")
+result_dir_bed = file("results_bed$tag_res")
 
 result_dir_bed.with {
     if( !empty() ) { deleteDir() }
@@ -527,7 +530,7 @@ bed_loc_no_nas.subscribe {
 */
 
 /*
-result_dir_bedGraph = file("results_bedGraph_$tag_res")
+result_dir_bedGraph = file("results_bedGraph$tag_res")
 
 result_dir_bedGraph.with {
     if( !empty() ) { deleteDir() }
