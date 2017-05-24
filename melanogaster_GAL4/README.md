@@ -33,11 +33,14 @@ mkdir data
 wget -O- https://zenodo.org/record/582475/files/melanogaster_GAL4.tar.gz | tar xz -C data
 ```
 
+### Original Data Sources
+The original data can be downloaded from the following [source](http://sourceforge.net/projects/jaaba/files/Sample%20Data/sampledata_v0.5.zip/download).
+
 ### Run nextflow pipeline
 Once data is downloaded, it is possible to reproduce all the results using this command:
 
 ```bash
-NXF_VER=0.24.0 ./melanogaster_GAL4-Pergola-Reproduce.nf --scores='data/scores/*.mat' \
+NXF_VER=0.24.3 nextflow run melanogaster_GAL4-Pergola-Reproduce.nf --scores='data/scores/*.mat' \
                                                         --var_dir='data/perframe/' \
                                                         --variables="velmag" \
                                                         --mappings='data/jaaba2pergola.txt' \

@@ -48,7 +48,7 @@ log.info "tag results                 : ${params.tag_results}"
 log.info "\n"
 
 /*
-./N2_vs_unc16_motions-Pergola-Reproduce.nf --strain1_trackings 'small_data/unc_16/*.mat' --strain2_trackings 'small_data/N2/*.mat' \
+nextflow run N2_vs_unc16_motions-Pergola-Reproduce.nf --strain1_trackings 'small_data/unc_16/*.mat' --strain2_trackings 'small_data/N2/*.mat' \
 	--mappings_speed 'small_data/mappings/worms_speed2p.txt' \
 	--mappings_bed 'small_data/mappings/bed2pergola.txt' \
 	--mappings_motion small_data/mappings/worms_motion2p.txt \
