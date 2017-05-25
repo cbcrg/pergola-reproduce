@@ -64,8 +64,9 @@ map_motion = file(params.mappings_motion)
 /*
  * Input files validation
  */
-if( !map_speed.exists() ) exit 1, "Missing mapping file: ${map_speed}"
-if( !map_motion.exists() ) exit 1, "Missing mapping file: ${map_motion}" 
+if( !map_speed.exists() ) exit 1, "Missing speed mapping file: ${map_speed}"
+if( !file(params.mappings_bed).exists() ) exit 1, "Missing bed mapping file: ${params.mappings_bed}" 
+if( !map_motion.exists() ) exit 1, "Missing motion mapping file: ${map_motion}" 
 
 /*
  * Create a channel for strain 1 worm trackings 

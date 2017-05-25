@@ -26,21 +26,22 @@
  * Script to reproduce Pergola paper Jaaba annotated data analysis
  */
 
-params.scores      = "$baseDir/data/scores/.mat"
-params.variables   = "$baseDir/data/perframe/*.mat"
-params.mappings    = "$baseDir/data/b2p.txt"
+params.scores      = "$baseDir/small_data/scores/scores_chase.mat"
+params.var_dir     = "$baseDir/small_data/perframe/"
+params.variables   = "velmag"
+params.mappings    = "$baseDir/small_data/jaaba2pergola.txt"
 params.output      = "results/"
 
 log.info "drosophila_jaaba - Pergola - Reproduce  -  version 0.1"
 log.info "====================================="
 log.info "annotated scores       : ${params.scores}"
 log.info "variables directory    : ${params.var_dir}"
-log.info "variables folder       : ${params.variables}"
+log.info "variables to run       : ${params.variables}"
 log.info "mappings               : ${params.mappings}"
 log.info "output                 : ${params.output}"
 log.info "\n"
 
-// Example command to run the script
+// Example command to run the script with the toy data provided in the repository
 /*
 nextflow run melanogaster_GAL4-Pergola-Reproduce.nf \
 	--scores='small_data/scores/scores_chase.mat' \
@@ -53,15 +54,18 @@ nextflow run melanogaster_GAL4-Pergola-Reproduce.nf \
 /*
  * Input parameters validation
  */
-
 mapping_file = file(params.mappings)
+
+if( !mapping_file.exists() ) exit 1, "Missing mapping file: ${mapping_file}"
+if( !file(params.scores).exists() ) exit 1, "Missing scores file: ${params.scores}"
+if( !file(params.var_dir).exists() ) exit 1, "Missing variable directory: ${params.var_dir}"
 
 /*
  * Create a channel for scores
  */
 Channel
 	.fromPath( params.scores )
-    .ifEmpty { error "Cannot find any mat file with Jaaba annotated scores" }
+  .ifEmpty { error "Cannot find any mat file with Jaaba annotated scores" }
 	.set { score_files }
 
 score_files_tag = score_files.map {
@@ -76,14 +80,20 @@ score_files_tag.into { score_files_tag_bed; score_files_tag_comp }
  * Create a channel for directory containing variables
  */
 variable_dir = Channel.fromPath( params.var_dir )
-                      //.println ()
 
 variable_dir.into { variable_dir_bg; variable_dir_scores }
 
 /*
- * Variable list to extract from the folder
+ * List of variable to extract from the folder. If set to "all", all variables are extracted.
  */
-variables_list = params.variables.split(" ")                 
+//if( params.variables == "" ) exit 1, "Variables to extract not provided: ${params.variables}"
+
+if ( params.variables == "all" ) {
+  variables_list = "a absangle2wall absanglefrom1to2_anglesub absanglefrom1to2_nose2ell absdangle2wall absdtheta absdv_cor absphidiff_anglesub absphidiff_nose2ell abssmoothdtheta absthetadiff_anglesub absthetadiff_nose2ell absyaw accmag angle2wall anglefrom1to2_anglesub anglefrom1to2_nose2ell angleonclosestfly anglesub area areasmooth arena_angle arena_r b closestfly_anglesub closestfly_center closestfly_ell2nose closestfly_nose2ell closestfly_nose2ell_angle_30tomin30 closestfly_nose2ell_angle_min20to20 closestfly_nose2ell_angle_min30to30 closestfly_nose2tail corfrac_maj corfrac_min da dangle2wall danglesub darea db dcenter ddcenter ddell2nose ddist2wall ddnose2ell decc dell2nose dist2wall dnose2ell dnose2ell_angle_30tomin30 dnose2ell_angle_min20to20 dnose2ell_angle_min30to30 dnose2tail dphi dt dtheta du_cor du_ctr du_tail dv_cor dv_ctr dv_tail ecc flipdv_cor magveldiff_anglesub magveldiff_nose2ell phi phisideways signdtheta smoothdtheta theta timestamps velmag velmag_ctr velmag_nose velmag_tail veltoward_anglesub veltoward_nose2ell xnose_mm yaw ynose_mm".split(" ")
+}
+else {
+  variables_list = params.variables.split(" ")             
+}
 
 process scores_to_bed {
     input:
