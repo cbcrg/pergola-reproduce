@@ -515,9 +515,10 @@ longest_fasta.subscribe {
     fasta_file.copyTo ( result_dir_IGV.resolve ( "celegans.fa" ) )
 }
 
-/*
+
 result_dir_bed = file("results_bed$tag_res")
 
+/*
 result_dir_bed.with {
     if( !empty() ) { deleteDir() }
     mkdirs()
@@ -555,4 +556,11 @@ result_dir_IGV_intersect.with {
 bedGraph_intersect_loc_motion.subscribe {
     bedGraph_file = it[0]
     bedGraph_file.copyTo ( result_dir_IGV_intersect.resolve ( "intersect." + it[1] + "." + it[3] + "." + it[4] + ".bedGraph" ) )
+}
+
+//set name_file, 'tr*.bed', name_file_motion into bed_motion, bed_motion_wr
+
+bed_motion_wr.subscribe {
+  bed_direction = it[1]
+  bed_direction.copyTo ( result_dir_bed.resolve ( it[0] + "_" + it[2] + "_direction" + ".bed" ))
 }

@@ -38,4 +38,9 @@ vignettes/*.pdf
 /celegans_n2_unc16/work
 /celegans_n2_unc16/.nextflow*
 .nextflow*
+work/
+results/
+
+.idea
+
 
