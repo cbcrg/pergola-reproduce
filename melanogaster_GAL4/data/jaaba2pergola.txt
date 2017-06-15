@@ -1,7 +1,7 @@
-! Mapping of behavioural fields into genome browser fields
+! Mapping of behavioral fields into genome browser fields
 !
-behavioural_file:animal > genome_file:track
-behavioural_file:startTime > genome_file:start
-behavioural_file:endTime > genome_file:end
-behavioural_file:value > genome_file:data_value
-behavioural_file:dataType > genome_file:data_types
+behavioral_file:animal > pergola:track
+behavioral_file:startTime > pergola:start
+behavioral_file:endTime > pergola:end
+behavioral_file:value > pergola:data_value
+behavioral_file:dataType > pergola:data_types
