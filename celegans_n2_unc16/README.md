@@ -82,10 +82,13 @@ N2 on food_2009_12_09__10_33_20__1_features.mat
 Once data is downloaded, it is possible to reproduce all the paper results using this command:
 
 ```bash
-NXF_VER=0.24.3 nextflow run N2_vs_unc16_motions-Pergola-Reproduce.nf --strain1_trackings 'data/unc_16/*.mat' --strain2_trackings 'data/N2/*.mat' \
-  --mappings_speed 'data/mappings/worms_speed2p.txt' \
+NXF_VER=0.24.3 nextflow run N2_vs_unc16_motions-Pergola-Reproduce.nf \ 
+    --strain1_trackings 'data/unc_16/*.mat' \
+    --strain2_trackings 'data/N2/*.mat' \
+    --mappings_speed 'data/mappings/worms_speed2p.txt' \
 	--mappings_bed 'data/mappings/bed2pergola.txt' \
-	--mappings_motion data/mappings/worms_motion2p.txt -with-docker
+	--mappings_motion data/mappings/worms_motion2p.txt \ 
+	-with-docker
 ```	
 
 ## Visualization

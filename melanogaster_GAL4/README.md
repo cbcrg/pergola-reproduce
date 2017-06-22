@@ -40,11 +40,12 @@ The original data can be downloaded from the following [source](http://sourcefor
 Once data is downloaded, it is possible to reproduce all the results using this command:
 
 ```bash
-NXF_VER=0.24.3 nextflow run melanogaster_GAL4-Pergola-Reproduce.nf --scores='data/scores/scores_chase.mat' \
-                                                        --var_dir='data/perframe/' \
-                                                        --variables="velmag" \
-                                                        --mappings='data/jaaba2pergola.txt' \
-                                                        -with-docker
+NXF_VER=0.24.3 nextflow run melanogaster_GAL4-Pergola-Reproduce.nf \ 
+    --scores='data/scores/scores_chase.mat' \
+    --var_dir='data/perframe/' \
+    --variables="velmag" \
+    --mappings='data/jaaba2pergola.txt' \
+    -with-docker
 ```
 
 
