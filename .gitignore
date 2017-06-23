@@ -32,7 +32,7 @@ vignettes/*.pdf
 *.utf8.md
 *.knit.md
 .Rproj.user
-*.Rproj
+*.Rprojc
 
 # Nextflow files
 /celegans_n2_unc16/work
@@ -43,4 +43,8 @@ results/
 
 .idea
 
+# images
+*.tiff
+*.pdf
+#*.png
 
