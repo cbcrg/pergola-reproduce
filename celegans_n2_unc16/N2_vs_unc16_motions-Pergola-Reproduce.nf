@@ -162,8 +162,8 @@ process feature_to_pergola {
   	set '*.no_tr.bedGraph', body_part, name_file into bedGraph_heatmap
   	
   	set name_file, body_part, '*.no_tr.bed', exp_group into bed_loc_no_track_line, bed_loc_no_track_line_cp
-  	set name_file, body_part, '*.no_tr.bedGraph', exp_group into bedGraph_loc_no_track_line
-  	
+  	set name_file, body_part, '*.no_tr.bedGraph', exp_group, 'chrom.sizes' into bedGraph_loc_no_track_line, bedGraph_loc_no_track_line_cp
+
   	set '*.fa', body_part, name_file, val(exp_group) into out_fasta  	
   	
   	"""  	
@@ -254,7 +254,7 @@ bed_loc_motion = bed_loc_no_track_line
 	.filter { it[0] == it[4] }
 
 /*
- * Using bedtools intersect motion with phenotypic feature bed files
+ * Using pybedtools intersect motion with phenotypic feature bed files
  */
 process intersect_loc_motion {
 	
@@ -422,6 +422,39 @@ process heat_and_density_plot {
   	"""
 }
 
+/*
+ * Matching the control group for each strain in the data set
+ */
+str1_bedGraph = bedGraph_loc_no_track_line.filter { it[3] == tag_str1 }
+str2_bedGraph = bedGraph_loc_no_track_line_cp.filter { it[3] == tag_str2 }
+
+str1_bedGraph.into { str1_bedGraph1; str1_bedGraph2}
+str2_bedGraph.into { str2_bedGraph1; str2_bedGraph2}
+
+str1_bedGraph_crossed = str1_bedGraph1
+    .cross (str1_bedGraph2)
+	//same body part
+	//.println ()
+	//.filter { it[1] == it[6] }
+	//.map { [ it[0],it[1], it[5], it[6] ] }
+	.println (  )
+
+/*
+ *
+ */
+/*
+process bedgraph_to_bigWig {
+
+  	input:
+  	file (str1_f) from bedGraph_loc_no_track_line
+  	set name_file, body_part, '*.no_tr.bedGraph', exp_group, 'chrom.sizes' into bedGraph_loc_no_track_line
+
+  	"""
+
+  	"""
+
+ }
+*/
 result_dir_heatmap = file("$baseDir/heatmap$tag_res")
  
 result_dir_heatmap.with {
