@@ -72,25 +72,25 @@ if( !map_motion.exists() ) exit 1, "Missing motion mapping file: ${map_motion}"
  * Create a channel for strain 1 worm trackings 
  */
 Channel
-	  .fromPath( params.strain1_trackings )
+    .fromPath( params.strain1_trackings )
     .ifEmpty { error "Cannot find any mat file with strain 1 data" }
-	  .set { strain1_files }
+	.set { strain1_files }
 	
 /*
  * Create a channel for strain 2 worm trackings 
  */
 Channel
-	  .fromPath( params.strain2_trackings )
+	 .fromPath( params.strain2_trackings )
     .ifEmpty { error "Cannot find any mat file with strain 2 data" }
-	  .set { strain2_files }
+	 .set { strain2_files }
 
 /*
- * Create a channel for strain 2 worm trackings 
+ * Create a channel for pergola mappings for bed files
  */
 Channel
-	  .fromPath( params.mappings_bed )
-    .ifEmpty { error "Missing mapping file: ${map_motion}" }
-	  .set { map_bed }
+	.fromPath( params.mappings_bed )
+    .ifEmpty { error "Missing mapping file: ${params.mappings_bed}" }
+	.set { map_bed }
 
 /*
  * Read tag for results if exists 
@@ -101,8 +101,8 @@ tag_str2 = "strain2_worms"
 
 /*
  * Creates a channel with file content and name of input file without spaces
- * Substitutes spaces by "_" in file name
- */ 
+ * Substitutes spaces by "_" in file name - strain 1
+ */
 strain1_files_name = strain1_files.flatten().map { strain1_files_file ->      
   	def content = strain1_files_file
   	def name = strain1_files_file.name.replaceAll(/ /,'_')
@@ -110,6 +110,10 @@ strain1_files_name = strain1_files.flatten().map { strain1_files_file ->
     [ content, name, tag ]
 }
 
+/*
+ * Creates a channel with file content and name of input file without spaces
+ * Substitutes spaces by "_" in file name - strain 2
+ */
 strain2_files_name = strain2_files.flatten().map { strain2_files_file ->      
   	def content = strain2_files_file
   	def name = strain2_files_file.name.replaceAll(/ /,'_')
@@ -122,7 +126,7 @@ trackings_files_name = strain2_files_name.mix ( strain1_files_name )
 trackings_files_name.into { trackings_loc; trackings_motion }
 
 /*
- * Get locomotion phenotypic features from mat files
+ * Get locomotion phenotypic features from mat files (speed)
  */ 
 process get_feature {
   	
@@ -163,7 +167,7 @@ process feature_to_pergola {
   	set '*.fa', body_part, name_file, val(exp_group) into out_fasta  	
   	
   	"""  	
-  	cat $worms_speed2p | sed 's/behavioural_file:$body_part > pergola:dummy/behavioural_file:$body_part > pergola:data_value/g' > mod_map_file
+  	cat $worms_speed2p | sed 's/behavioral_file:$body_part > pergola:dummy/behavioral_file:$body_part > pergola:data_value/g' > mod_map_file
   	pergola_rules.py -i $speed_file -m mod_map_file
   	pergola_rules.py -i $speed_file -m mod_map_file -f bedGraph -w 1 -min 0 -max 29000
   	
@@ -367,6 +371,9 @@ str2_bedGraph_heatmap = bedGraph_heatmap_str2
               							.filter { it[2] =~ /^N2.*/  }
               							.map { it[0] }						
 
+/*
+ * Plotting heat map and density plots
+ */
 process heat_and_density_plot {
 
   	input:  	
@@ -377,7 +384,7 @@ process heat_and_density_plot {
     file (str2_b) from str2_bed_back
     file (str2_p) from str2_bed_paused
     
-	  file (str1_bedGraph_heatmap_list) from str1_bedGraph_heatmap.toSortedList()
+	file (str1_bedGraph_heatmap_list) from str1_bedGraph_heatmap.toSortedList()
     file (str2_bedGraph_heatmap_list) from str2_bedGraph_heatmap.toSortedList()
     
   	output:
