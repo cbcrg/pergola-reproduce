@@ -146,8 +146,8 @@ process get_feature {
 
 /*
  * Transform locomotion files into bed format files
- */ 
-body_parts =  ['midbody']
+ */
+body_parts =  ['head', 'headTip', 'midbody', 'tail', 'tailTip']
 
 process feature_to_pergola {
 
@@ -306,7 +306,7 @@ bed_intersect_loc_motion_plot = bed_intersect_loc_motion2p.collectFile(newLine: 
 	  def pheno_feature =  it.name.split("\\.")[1]	
 	  def direction =  it.name.split("\\.")[2]
 	  def exp_group =  it.name.split("\\.")[3]
-    def name_file = it.name.replaceAll("." + tag_str2, '').replaceAll("." + tag_str1, '')
+      def name_file = it.name.replaceAll("." + tag_str2, '').replaceAll("." + tag_str1, '')
 
  	  [ it, strain, pheno_feature, direction, name_file, exp_group ]
 }
@@ -425,36 +425,82 @@ process heat_and_density_plot {
 /*
  * Matching the control group for each strain in the data set
  */
+/*
+//esta parte no la necesito porque luego al final puedo filtrar
 str1_bedGraph = bedGraph_loc_no_track_line.filter { it[3] == tag_str1 }
 str2_bedGraph = bedGraph_loc_no_track_line_cp.filter { it[3] == tag_str2 }
 
 str1_bedGraph.into { str1_bedGraph1; str1_bedGraph2}
 str2_bedGraph.into { str2_bedGraph1; str2_bedGraph2}
 
-str1_bedGraph_crossed = str1_bedGraph1
-    .cross (str1_bedGraph2)
-	//same body part
-	//.println ()
-	//.filter { it[1] == it[6] }
-	//.map { [ it[0],it[1], it[5], it[6] ] }
-	.println (  )
+
+str1_bedGraph_corr_pairs = str1_bedGraph1
+                            .combine ( str1_bedGraph2, by:0 )
+                            .map { [it[0], it[1], it[2], it[3], it [4], it[5], it[6] ] }
+                            .filter { it ->
+                                it[1] < it[5]
+                            }
+                            //.subscribe { println it }
+
+str2_bedGraph_corr_pairs = str2_bedGraph1
+                            .combine ( str2_bedGraph2, by:0 )
+                            .map { [it[0], it[1], it[2], it[3], it [4], it[5], it[6] ] }
+                            .filter { it ->
+                                it[1] < it[5]
+                            }
+                            //.subscribe { println it }
+*/
+bedGraph_loc_no_track_line.into { bedGraph_loc_no_track_line1; bedGraph_loc_no_track_line2}
+
+
+
+bedGraph_corr_pairs = bedGraph_loc_no_track_line1
+                            .combine ( bedGraph_loc_no_track_line2, by:0 )
+                            .map { [it[0], it[1], it[2], it[3], it [4], it[5], it[6] ] }
+                            .filter { it ->
+                                it[1] < it[5]
+                            }
+                            //.subscribe { println it }
 
 /*
- *
+ * For each pair get the correlation using bigwig
  */
-/*
 process bedgraph_to_bigWig {
 
   	input:
-  	file (str1_f) from bedGraph_loc_no_track_line
-  	set name_file, body_part, '*.no_tr.bedGraph', exp_group, 'chrom.sizes' into bedGraph_loc_no_track_line
+  	//file (str1_f) from str1_bedGraph_corr_pairs
+  	set val (name_file), val (body_part1), file ('bedGraph1_nt'), exp_group, file ('chrom_sizes'), val (body_part2), file ('bedGraph2_nt') from bedGraph_corr_pairs
+
+    output:
+    set stdout, body_part1, body_part2 into body_part_correlations
 
   	"""
+    bedGraphToBigWig ${bedGraph1_nt} ${chrom_sizes} ${bedGraph1_nt}".bw"
+    bedGraphToBigWig ${bedGraph2_nt} ${chrom_sizes} ${bedGraph2_nt}".bw"
 
+    bigWigCorrelate ${bedGraph1_nt}".bw" ${bedGraph2_nt}".bw" > corr.txt
   	"""
-
  }
-*/
+
+body_part_correlations_tbl = body_part_correlations.collectFile (name: 'correlations.txt', newLine: false)
+
+process correlation_body_speeds_heatmap {
+
+    input:
+    file (correlations_file) from body_part_correlations_tbl
+
+    output:
+    stdout culo
+
+    """
+    cat ${correlations_file}
+    """
+}
+
+culo.subscribe {
+    println it
+}
+
 result_dir_heatmap = file("$baseDir/heatmap$tag_res")
  
 result_dir_heatmap.with {
