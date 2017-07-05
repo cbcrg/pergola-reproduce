@@ -96,10 +96,11 @@ file_format <- ".pdf"
 
 name_out <- paste(name_file, file_format, sep="")
 
-ggplot(data = mean_corr, aes(V3, V2, fill = V4)) +
+ggplot(data = mean_corr, aes(V3, V2, fill = V4, label=V4), color=black, size=12) +
   geom_tile(color = "white")+
+  geom_text(aes(label = round(V4, 3))) +
   scale_fill_gradient2(low = "blue", high = "red", mid = "white", 
-                       midpoint = 0.5, limit = c(0,1), space = "Lab", 
+                       midpoint = 0, limit = c(-1,1), space = "Lab", 
                        name="Pearson\nCorrelation") +
   labs(x = "", y = "") +
   #theme_minimal()+ 
