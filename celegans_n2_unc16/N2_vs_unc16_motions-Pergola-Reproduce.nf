@@ -291,7 +291,7 @@ process inters_to_bedGr {
 		  pergola_rules.py -i $file_bed_inters -m $bed2pergola -nh -s chrm start end nature value strain start_rep end_rep color -f bedGraph -w 1
 	  else
 		  touch tr_chr1_d.bedGraph
-    fi 	
+      fi
 	  """
 }
 
@@ -452,13 +452,11 @@ str2_bedGraph_corr_pairs = str2_bedGraph1
 */
 bedGraph_loc_no_track_line.into { bedGraph_loc_no_track_line1; bedGraph_loc_no_track_line2}
 
-
-
 bedGraph_corr_pairs = bedGraph_loc_no_track_line1
                             .combine ( bedGraph_loc_no_track_line2, by:0 )
                             .map { [it[0], it[1], it[2], it[3], it [4], it[5], it[6] ] }
                             .filter { it ->
-                                it[1] < it[5]
+                                it[1] < it[5] || it[1] == it[5]
                             }
                             //.subscribe { println it }
 
@@ -472,33 +470,37 @@ process bedgraph_to_bigWig {
   	set val (name_file), val (body_part1), file ('bedGraph1_nt'), exp_group, file ('chrom_sizes'), val (body_part2), file ('bedGraph2_nt') from bedGraph_corr_pairs
 
     output:
-    set stdout, body_part1, body_part2 into body_part_correlations
+    //set 'corr.txt', body_part1, body_part2 into body_part_correlations
+    set '*.txt', exp_group into body_part_correlations
 
   	"""
     bedGraphToBigWig ${bedGraph1_nt} ${chrom_sizes} ${bedGraph1_nt}".bw"
     bedGraphToBigWig ${bedGraph2_nt} ${chrom_sizes} ${bedGraph2_nt}".bw"
 
-    bigWigCorrelate ${bedGraph1_nt}".bw" ${bedGraph2_nt}".bw" > corr.txt
+    bigWigCorrelate ${bedGraph1_nt}".bw" ${bedGraph2_nt}".bw" > corr.tmp
+    echo -ne "${name_file}\t${body_part1}\t${body_part2}\t" |  cat - corr.tmp > corr_${body_part1}_${body_part2}.txt
   	"""
  }
 
-body_part_correlations_tbl = body_part_correlations.collectFile (name: 'correlations.txt', newLine: false)
-
-process correlation_body_speeds_heatmap {
-
-    input:
-    file (correlations_file) from body_part_correlations_tbl
-
-    output:
-    stdout culo
-
-    """
-    cat ${correlations_file}
-    """
+//body_part_correlations_tbl = body_part_correlations.collectFile (newLine: false,  name: 'corr.tbl', sort:'none')
+body_part_correlations_tbl = body_part_correlations.collectFile (newLine: false, sort:'none') { item ->
+    [ "${item[1]}.csv", item[0].text ]
 }
 
-culo.subscribe {
-    println it
+/*
+ * Heatmap of correlations of behavioral measures
+ */
+process corr_beh_measures_heatmap {
+
+    input:
+    file (correlations_tbl) from body_part_correlations_tbl
+
+    output:
+    set '*.pdf' into heatmap_correlations
+
+    """
+    heatmap_behavioral_measures.R  --corr_tbl=${correlations_tbl}
+    """
 }
 
 result_dir_heatmap = file("$baseDir/heatmap$tag_res")
