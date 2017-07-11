@@ -327,7 +327,8 @@ process tag_bed_mean_files {
   	"""
 }
 
-bed_tagged.into { bed_tagged_for_str1; bed_tagged_for_str1_f; bed_tagged_for_str1_b; bed_tagged_for_str1_p; bed_tagged_for_str2; bed_tagged_for_str2_f; bed_tagged_for_str2_b; bed_tagged_for_str2_p}
+bed_tagged_f = bed_tagged.filter { it[2] == "midbody" }
+bed_tagged_f.into { bed_tagged_for_str1; bed_tagged_for_str1_f; bed_tagged_for_str1_b; bed_tagged_for_str1_p; bed_tagged_for_str2; bed_tagged_for_str2_f; bed_tagged_for_str2_b; bed_tagged_for_str2_p}
 
 str1_bed_tagged = bed_tagged_for_str1.filter { it[4] == tag_str1 }
 str2_bed_tagged = bed_tagged_for_str2.filter { it[4] == tag_str2 }
