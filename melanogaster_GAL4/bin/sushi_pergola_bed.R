@@ -82,7 +82,8 @@ library(gtools) #mixedsort
 base_folder <- path2bed_files
 chase.bed.files <- mixedsort(list.files(base_folder, pattern="tr.*.bed$", full.names=TRUE))
 data_bed <- lapply(chase.bed.files, function (bed, dir=direction) { 
-  name_id <- gsub("tr_", "", gsub("_dt_chase.bed", "", basename(bed)))
+  # name_id <- gsub("tr_", "", gsub("_dt_chase.bed", "", basename(bed)))
+  name_id <- sub("tr_(.*?)_dt_.*\\.bed", "\\1", basename(bed))
   bed_tbl <- read.csv(file=bed, header=FALSE, sep="\t", stringsAsFactors=FALSE)
   bed_tbl$name <- as.numeric(name_id)
   return (bed_tbl)
