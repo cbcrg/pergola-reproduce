@@ -44,7 +44,7 @@ log.info "\n"
 // Example command to run the script with the toy data provided in the repository
 /*
 nextflow run melanogaster_GAL4-Pergola-Reproduce.nf \
-	--scores='small_data/scores/scores_chase.mat' \
+  --scores='small_data/scores/scores_chase.mat' \
   --var_dir='small_data/perframe/' \
   --variables="dnose2ell dtheta velmag" \
   --mappings='small_data/jaaba2pergola.txt' \
@@ -57,25 +57,24 @@ nextflow run melanogaster_GAL4-Pergola-Reproduce.nf \
 mapping_file = file(params.mappings)
 
 if( !mapping_file.exists() ) exit 1, "Missing mapping file: ${mapping_file}"
-if( !file(params.scores).exists() ) exit 1, "Missing scores file: ${params.scores}"
 if( !file(params.var_dir).exists() ) exit 1, "Missing variable directory: ${params.var_dir}"
 
 /*
  * Create a channel for scores
  */
 Channel
-	.fromPath( params.scores )
+  .fromPath( params.scores )
   .ifEmpty { error "Cannot find any mat file with Jaaba annotated scores" }
-	.set { score_files }
+  .set { score_files }
 
 score_files_tag = score_files.map {
-	def content = it
-	def name = it.name.replaceAll('scores_',' ').split("\\.")[0]
-	[ content, name ]
+  def content = it
+  def name = it.baseName.replaceAll('scores_',' ').split("\\.")[0]
+  [ content, name ]
 }
 
-score_files_tag.into { score_files_tag_bed; score_files_tag_comp }
-
+score_files_tag.into { score_files_tag_bed; score_files_tag_comp; score_files_print }
+score_files_print.println()
 /*
  * Create a channel for directory containing variables
  */
@@ -95,20 +94,46 @@ else {
   variables_list = params.variables.split(" ")             
 }
 
-process scores_to_bed {
+/*
+ * We use genome coverage to obtain the fraction of time performing the behavior
+ */
+process frac_time_behavior {
     input:
-    set file (scores), val (annotated_behavior) from score_files_tag_bed
+    set file (scores), val (tag_group) from score_files_tag_bed
     file mapping_file
 
     output:
+    stdout into fraction_time
+    file 'tr*.bed' into bed_score_cov
+    file 'chrom.sizes' into chrom_sizes
     file 'results_score' into results_bed_score, results_bed_score_2
 
     """
-    jaaba_to_pergola sp -i ${scores} -m ${mapping_file} -f bed -bl -nt
+    cov_fraction_time_behavior.py -s ${scores} -m  ${mapping_file} -t ${tag_group}
     mkdir results_score
-    mv *.bed results_score/
+    # mv *.bed results_score/
+    cp *.bed results_score/
     """
 }
+
+fraction_time_comb_gr = fraction_time.collectFile()
+//fraction_time_comb_gr.println()
+
+/*
+ * Compares the fraction of time spent of a given behavior on a boxplot
+ */
+process comparison_fract_time {
+    input:
+    file ('fraction_time_tbl') from fraction_time_comb_gr
+
+    output:
+    file "boxplot_fract_time*.pdf" into boxplot_fractime
+
+    """
+    boxplot_fract_time.R --path2tbl_fr_time=${fraction_time_tbl}
+    """
+}
+
 
 process variables_to_bedGraph {
     input:
@@ -129,6 +154,7 @@ process variables_to_bedGraph {
 /*
 The resulting plot is not used by the moment in the paper, eventually delete
 */
+
 process sushi_plot {
     input:
     set var_bedg_dir, var from results_bedg_var
@@ -141,6 +167,7 @@ process sushi_plot {
     sushi_pergola_bedAndBedGraph.R --path2variables=${var_bedg_dir} --path2scores=${scores_bed_dir} --variable_name=${var}
     """
 }
+
 
 process jaaba_scores_vs_variables {
 

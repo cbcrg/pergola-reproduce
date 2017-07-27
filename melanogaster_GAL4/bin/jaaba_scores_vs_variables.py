@@ -23,7 +23,7 @@
 ### Script process jaaba derived scores (chasing) and var derived from   ###
 ### the trajectory using Pergola. Then uses pybedtools to intersect      ###
 ### annotated periods and scores and complement of the annotated periods.###
-### Then uses R for compare means                                        ###
+### Save data as a bedGraph file                                         ###
 ############################################################################
 
 from argparse   import ArgumentParser
