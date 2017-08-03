@@ -86,6 +86,19 @@ names (argsL) <- argsDF$V1
   }
 }
 
+# behavior_group
+{
+  if (is.null (argsL$behavior_strain))
+  {
+    print ("[WARNING]: behavior_group is set to \"default=behavior_strain\"\n")
+    behavior_strain <- "behavior_strain"
+  }
+  else
+  {
+    behavior_strain <- argsL$behavior_strain
+  }
+}
+
 ## Loading libraries
 library(utils)
 source("https://bioconductor.org/biocLite.R")
@@ -135,8 +148,8 @@ chromend         = 25000
 
 # title <- paste("  ", variable_name, sep="")
 
-# png(paste("sushi_highlight", variable_name, ".png", sep=""))
-pdf ( paste("sushi_highlight", variable_name, ".pdf", sep="") , height=10, width=20)
+# png(paste("sushi_highlight", variable_name, "_", behavior_strain, ".png", sep=""))
+pdf ( paste("sushi_highlight", variable_name, "_", behavior_strain, ".pdf", sep="") , height=10, width=20)
 
 # split.screen (c(2, 1)) 
 

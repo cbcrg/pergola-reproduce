@@ -28,6 +28,7 @@
 
 params.scores      = "$baseDir/small_data/scores/scores_chase.mat"
 params.var_dir     = "$baseDir/small_data/perframe/"
+params.var_dir_test = "$baseDir/"
 params.variables   = "velmag"
 params.mappings    = "$baseDir/small_data/jaaba2pergola.txt"
 params.output      = "results/"
@@ -61,6 +62,7 @@ if( !file(params.var_dir).exists() ) exit 1, "Missing variable directory: ${para
 
 /*
  * Create a channel for scores
+ * File naming is scores_behavior_strain.map, thus tag corresponds to behavior and strain
  */
 Channel
   .fromPath( params.scores )
@@ -69,18 +71,26 @@ Channel
 
 score_files_tag = score_files.map {
   def content = it
-  def name = it.baseName.replaceAll('scores_',' ').split("\\.")[0]
+  def name = it.baseName.replaceAll('scores_','').split("\\.")[0]
   [ content, name ]
 }
 
 score_files_tag.into { score_files_tag_bed; score_files_tag_comp; score_files_print }
 score_files_print.println()
+
 /*
  * Create a channel for directory containing variables
  */
 variable_dir = Channel.fromPath( params.var_dir )
+//variable_dir_test = Channel
+//    	       	.fromPath( "${params.var_dir_test}/*.txt"  )
+//    		.set { var_dir_test_ch }
+
+//var_dir_test_ch.println()
 
 variable_dir.into { variable_dir_bg; variable_dir_scores }
+
+//variable_dir_print.println()
 
 /*
  * List of variable to extract from the folder. If set to "all", all variables are extracted.
@@ -106,7 +116,7 @@ process frac_time_behavior {
     stdout into fraction_time
     file 'tr*.bed' into bed_score_cov
     file 'chrom.sizes' into chrom_sizes
-    file 'results_score' into results_bed_score, results_bed_score_2
+    set 'results_score', tag_group into results_bed_score, results_bed_score_2
 
     """
     cov_fraction_time_behavior.py -s ${scores} -m  ${mapping_file} -t ${tag_group}
@@ -145,7 +155,7 @@ process variables_to_bedGraph {
     set 'results_var', var into results_bedg_var
 
     """
-    jaaba_to_pergola fp -i ${variable_d} -jf ${var}  -m ${mapping_file} -f bedGraph -nt
+    jaaba_to_pergola fp -i ${variable_d} -jf ${var} -m ${mapping_file} -f bedGraph -nt
     mkdir results_var
     mv *.bedGraph results_var/
     """
@@ -158,7 +168,7 @@ The resulting plot is not used by the moment in the paper, eventually delete
 process sushi_plot {
     input:
     set var_bedg_dir, var from results_bedg_var
-    file scores_bed_dir from results_bed_score.first()    
+    set scores_bed_dir, tag_group from results_bed_score.first()    
 
     output:
     file "sushi_jaaba_scores_annot_${var}.png" into sushi_plot
@@ -168,50 +178,63 @@ process sushi_plot {
     """
 }
 
+//score_files_tag_comp.into { score_files_tag_comp; score_files_tag_comp2 } //del
+score_files_tag_comp_var = score_files_tag_comp
+    .spread ( variables_list )
+
 
 process jaaba_scores_vs_variables {
 
   	input:
-  	set file (scores), val (annotated_behavior) from score_files_tag_comp
-  	file ('variable_d') from variable_dir_scores
-  	each var from variables_list
-    file mapping_file
+  	//set file (scores), val (behavior_strain) from score_files_tag_comp
+  	set file (scores), val (behavior_strain), val (var) from score_files_tag_comp_var
+  	file ('variable_d') from variable_dir_scores.first()
+  	//each var from variables_list
+        file mapping_file
 
   	output:
   	set file('results_annot'), var into annot_vs_non_annot_result
-    set file('results_bedGr'), var into bedGr_to_sushi
+    	set file('results_bedGr'), var, behavior_strain into bedGr_to_sushi
 
   	"""
-  	jaaba_scores_vs_variables.py -s ${scores} -t ${annotated_behavior} -d ${variable_d} -v ${var} -m  ${mapping_file}
+  	jaaba_scores_vs_variables.py -s ${scores} -t ${behavior_strain} -d ${variable_d} -v ${var} -m  ${mapping_file}
   	mkdir results_annot
   	mkdir results_bedGr
 
   	mv *.txt  results_annot/
-    mv *.bedGraph results_bedGr/
+        mv *.bedGraph results_bedGr/
   	"""
 }
 
+bedGr_to_sushi.into { bedGr_to_sushi; bedGr_to_sushi2 }
+//bedGr_to_sushi2.println()
+
 process sushi_plot_highlight_bg {
     input:
-    set file (bedGr_dir), var from bedGr_to_sushi
+    set file (bedGr_dir), val (var), val (behavior_strain) from bedGr_to_sushi
 
     output:
-    file "*.pdf" into sushi_plot2
+    set "*.pdf", var, behavior_strain into sushi_plot2
+
+    //script:
+    //behavior_strain.println()
 
     """
-    sushi_pergola_BedGraph_highlight.R --path2variables=${bedGr_dir} --variable_name=${var}
+    sushi_pergola_BedGraph_highlight.R --path2variables=${bedGr_dir} --variable_name=${var} --behavior_strain=${behavior_strain}
     """
 }
 
 process sushi_plot_behavior_annot {
     input:
-    file scores_bed_dir from results_bed_score_2.first()
+    //set scores_bed_dir, tag_group from results_bed_score_2.first()
+    set scores_bed_dir, tag_group from results_bed_score_2
 
     output:
     file "*.pdf" into sushi_plot_annot
 
     """
     sushi_pergola_bed.R --path2scores=${scores_bed_dir}
+    mv sushi_jaaba_annot.pdf "sushi_jaaba_annot_"${tag_group}".pdf" 
     """
 }
 
