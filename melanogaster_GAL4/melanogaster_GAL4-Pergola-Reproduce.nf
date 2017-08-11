@@ -116,7 +116,7 @@ process frac_time_behavior {
     stdout into fraction_time
     file 'tr*.bed' into bed_score_cov
     file 'chrom.sizes' into chrom_sizes
-    set 'results_score', tag_group into results_bed_score, results_bed_score_2
+    set 'results_score', tag_group into results_bed_score, results_bed_score_2, results_bed_score_3
 
     """
     cov_fraction_time_behavior.py -s ${scores} -m  ${mapping_file} -t ${tag_group}
@@ -194,7 +194,7 @@ process jaaba_scores_vs_variables {
 
   	output:
   	set file('results_annot'), var into annot_vs_non_annot_result
-    	set file('results_bedGr'), var, behavior_strain into bedGr_to_sushi
+    set file('results_bedGr'), var, behavior_strain into bedGr_to_sushi
 
   	"""
   	jaaba_scores_vs_variables.py -s ${scores} -t ${behavior_strain} -d ${variable_d} -v ${var} -m  ${mapping_file}
@@ -202,7 +202,7 @@ process jaaba_scores_vs_variables {
   	mkdir results_bedGr
 
   	mv *.txt  results_annot/
-        mv *.bedGraph results_bedGr/
+    mv *.bedGraph results_bedGr/
   	"""
 }
 
@@ -234,7 +234,20 @@ process sushi_plot_behavior_annot {
 
     """
     sushi_pergola_bed.R --path2scores=${scores_bed_dir}
-    mv sushi_jaaba_annot.pdf "sushi_jaaba_annot_"${tag_group}".pdf" 
+    mv sushi_jaaba_annot.pdf "sushi_jaaba_annot_"${tag_group}".pdf"
+    """
+}
+
+process gviz_plot_behavior_annot {
+    input:
+    set scores_bed_dir, tag_group from results_bed_score_3
+
+    output:
+    file "*.tiff" into gviz_plot_annot
+
+    """
+    melanogaster_gviz_visualization.R --path_bed_files=${scores_bed_dir}
+    mv gviz_jaaba_annot.tiff "gviz_jaaba_annot_"${tag_group}".tiff"
     """
 }
 
