@@ -28,10 +28,10 @@ home <- Sys.getenv("HOME")
 
 ### Execution example
 ## Rscript melanogaster_gviz_visualization.R --path_bed_files="path_to_bed_files"
-library(ggplot2)
+library("ggplot2")
 library("Gviz")
 
-## bedfiles to GRanges
+## bed files to GRanges
 library("GenomicRanges")
 library("rtracklayer")
 
@@ -87,7 +87,7 @@ names (argsL) <- argsDF$V1
 }
 
 #############################
-## Read files bedGraph files
+## Read files bed files
 bed_files <- list.files(path=path_bed_files, pattern="^tr*", full.names=TRUE)
 
 bed_tracks <- lapply(bed_files, function (bed) {
@@ -101,9 +101,9 @@ bed_tracks <- lapply(bed_files, function (bed) {
   } )
 
 names(bed_tracks) <- as.numeric(gsub(".+tr_(\\d+)(_.+$)", "\\1", bed_files))
-bed_tracks <- bed_tracks[as.character(1:20)]
+bed_tracks <- bed_tracks[as.character(1:length(bed_files))]
 
 name_file <- "gviz_jaaba_annot.tiff"
 tiff(name_file, width = 45 , height = 34, units = "cm", res=300)
-plotTracks(bed_tracks, stacking="dense", collapse=FALSE, shape = "box", col=NULL) 
+plotTracks(bed_tracks, stacking="dense", from=0, collapse=FALSE, shape = "box", col=NULL) 
 dev.off()
