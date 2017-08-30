@@ -45,10 +45,27 @@ log.info "\n"
 // Example command to run the script with the toy data provided in the repository
 /*
 nextflow run melanogaster_GAL4-Pergola-Reproduce.nf \
-  --scores='small_data/scores/scores_chase.mat' \
+  --scores='small_data/scores/scores_chase_*.mat' \
   --var_dir='small_data/perframe/' \
   --variables="dnose2ell dtheta velmag" \
   --mappings='small_data/jaaba2pergola.txt' \
+  -with-docker
+
+// by strain
+nextflow run melanogaster_GAL4-Pergola-Reproduce.nf \
+  --scores='small_data/scores/scores_chase_case_TrpA.mat' \
+  --var_dir='small_data/perframe_TrpA/' \
+  --variables="dnose2ell dtheta velmag" \
+  --mappings='small_data/jaaba2pergola.txt' \
+  --output='TrpA'
+  -with-docker
+
+nextflow run melanogaster_GAL4-Pergola-Reproduce.nf \
+  --scores='small_data/scores/scores_chase_ctrl_pBDPGAL4.mat' \
+  --var_dir='small_data/perframe_pBDPGAL4/' \
+  --variables="dnose2ell dtheta velmag" \
+  --mappings='small_data/jaaba2pergola.txt' \
+  --output='pBDPGAL4'
   -with-docker
 */
 
@@ -88,9 +105,9 @@ variable_dir = Channel.fromPath( params.var_dir )
 
 //var_dir_test_ch.println()
 
-variable_dir.into { variable_dir_bg; variable_dir_scores }
+variable_dir.into { variable_dir_bg; variable_dir_scores; variable_dir_print}
 
-//variable_dir_print.println()
+variable_dir_print.println()
 
 /*
  * List of variable to extract from the folder. If set to "all", all variables are extracted.
@@ -152,7 +169,7 @@ process variables_to_bedGraph {
     file mapping_file
 
     output:
-    set 'results_var', var into results_bedg_var
+    set 'results_var', var into results_bedg_var, bedGr_to_gviz
 
     """
     jaaba_to_pergola fp -i ${variable_d} -jf ${var} -m ${mapping_file} -f bedGraph -nt
@@ -238,15 +255,30 @@ process sushi_plot_behavior_annot {
     """
 }
 
-process gviz_plot_behavior_annot {
+
+process gviz_plot_behavior_var {
     input:
-    set scores_bed_dir, tag_group from results_bed_score_3
+    set var_bedg_dir, var_name from bedGr_to_gviz
 
     output:
     file "*.tiff" into gviz_plot_annot
 
     """
-    melanogaster_gviz_visualization.R --path_bed_files=${scores_bed_dir}
+    melanogaster_gviz_var.R  --path2variables=${var_bedg_dir} --variable_name=${var_name}
+    mv gviz_jaaba_var.tiff "gviz_jaaba_var_"${var_name}".tiff"
+    """
+}
+
+
+process gviz_plot_behavior_annot {
+    input:
+    set scores_bed_dir, tag_group from results_bed_score_3
+
+    output:
+    file "*.tiff" into gviz_plot_var
+
+    """
+    melanogaster_gviz_annotations.R --path_bed_files=${scores_bed_dir}
     mv gviz_jaaba_annot.tiff "gviz_jaaba_annot_"${tag_group}".tiff"
     """
 }

@@ -57,8 +57,8 @@ if("--help" %in% args) {
       --path_bed_files=path_to_bed_files - character
       --help                             - print this text
       
-      Example:
-      ./plot_speed_motion_mean.R --path_bed_files=\"path_bed_files\" \n")
+      Example:      
+      ./melanogaster_gviz_annotations.R --path_bed_files=\"path_bed_files\" \n")
   
   q (save="no")
 }
