@@ -306,7 +306,7 @@ bed_intersect_loc_motion_plot = bed_intersect_loc_motion2p.collectFile(newLine: 
 	  def pheno_feature =  it.name.split("\\.")[1]	
 	  def direction =  it.name.split("\\.")[2]
 	  def exp_group =  it.name.split("\\.")[3]
-    def name_file = it.name.replaceAll("." + tag_str2, '').replaceAll("." + tag_str1, '')
+      def name_file = it.name.replaceAll("." + tag_str2, '').replaceAll("." + tag_str1, '')
 
  	  [ it, strain, pheno_feature, direction, name_file, exp_group ]
 }
@@ -383,12 +383,15 @@ process heat_and_density_plot {
     file (str2_f) from str2_bed_for
     file (str2_b) from str2_bed_back
     file (str2_p) from str2_bed_paused
-    
+
+    // This might be simplied as in the melanogaster example
 	file (str1_bedGraph_heatmap_list) from str1_bedGraph_heatmap.toSortedList()
     file (str2_bedGraph_heatmap_list) from str2_bedGraph_heatmap.toSortedList()
     
   	output:
     file 'heatmap_str1_str2.tiff' into heatmap
+    file ('results_bedgr1') into results_bedgr1
+    file ('results_bedgr2') into results_bedgr2
 
   	"""  	
   	mkdir str1
@@ -419,7 +422,28 @@ process heat_and_density_plot {
   		   --file_f_str1=${str1_f} --file_f_str2=${str2_f} \
   		   --file_b_str1=${str1_b} --file_b_str2=${str2_b} \
   		   --file_p_str1=${str1_p} --file_p_str2=${str2_p} 
+
+  	mv \$path_str1 results_bedgr1/
+  	mv \$path_str2 results_bedgr2/
   	"""
+}
+
+results_bedgr_1 = results_bedgr1.map { [ it, 'unc-16' ] }
+results_bedgr_2 = results_bedgr2.map { [ it, 'N2' ] }
+
+results_bedgr_sushi = results_bedgr_1.concat (results_bedgr_2)
+
+process heatmap_sushi {
+    input:
+    set var_bedg_dir, tag_group from results_bedgr_sushi
+
+    output:
+    file "*.pdf" into sushi_heatmap
+
+    """
+    heatmap_sushi.R --path_bedgr=${var_bedg_dir}
+    mv sushi_var.pdf "sushi_heatmap_"${tag_group}".pdf"
+    """
 }
 
 result_dir_heatmap = file("$baseDir/heatmap$tag_res")
