@@ -158,6 +158,7 @@ process feature_to_pergola {
   
   	output: 
   	set '*.no_na.bed', body_part, name_file into bed_loc_no_nas
+  	//set '*.no_na.bed', body_part, name_file, 'chrom.sizes' into bed_cov
   	set '*.zeros.bedGraph', body_part, name_file into bedGraph_loc_no_nas
   	set '*.no_tr.bedGraph', body_part, name_file into bedGraph_heatmap
   	
@@ -209,6 +210,29 @@ process get_motion {
   	extract_worm_motion.py -i \"$file_worm\"
   	"""
 }
+
+
+//bed_cov
+/*
+process motion_to_pergola {
+
+  	input:
+  	set file (bed_file), val (body_part), val (name_file) from bed_cov
+    falta chrom sizes
+    file worms_motion_map from map_motion
+
+  	output:
+  	set name_file, 'tr*.bed', name_file_motion into bed_motion, bed_motion_wr
+
+  	"""
+  	pergola_rules.py -i $motion_file -m $worms_motion_map
+  	cat tr_1_dt_${motion}.bed | sed 's/track name=\"1_a\"/track name=\"${motion}\"/g' > tr_1_dt_${motion}.bed.tmp
+  	cat tr_1_dt_${motion}.bed.tmp | grep -v 'track name' > tr_1_dt_${motion}.bed
+  	rm tr_1_dt_${motion}.bed.tmp
+  	"""
+}
+*/
+
 
 /*
  * From one mat file 3 motion (forward, paused, backward) files are obtained
