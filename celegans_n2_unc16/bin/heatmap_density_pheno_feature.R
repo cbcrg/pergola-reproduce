@@ -181,6 +181,10 @@ label_gr_2 <- "N2"
 ctrl_worms.base <- path_str2
 ctrl.worms.bedg.files <- list.files(ctrl_worms.base, pattern="*.bedGraph$", full.names=TRUE)
 
+df_order <- as.data.frame(ctrl.worms.bedg.files)
+df_order$id_num <- as.numeric(sub("bedg.str[1-2].(.*?)\\.bedGraph", "\\1", basename(ctrl.worms.bedg.files)))
+ctrl.worms.bedg.files <- as.vector(df_order[with(df_order, order(id_num)), "ctrl.worms.bedg.files"])
+
 scores_bedgr_n2 <- sapply (ctrl.worms.bedg.files, y <- function (x) { data <- read.table (x)                                                      
                                                                       return (data$V4)
 })
@@ -204,6 +208,10 @@ n2_bedg_dt_heatMap <- DataTrack(n2_bedg_GR, name = "midbody speed (microns/s)", 
 # Read unc16 data
 case_worms.base <- path_str1
 case.worms.bedg.files <- list.files(case_worms.base, pattern="*.bedGraph$", full.names=TRUE)
+
+df_order <- as.data.frame(case.worms.bedg.files)
+df_order$id_num <- as.numeric(sub("bedg.str[1-2].(.*?)\\.bedGraph", "\\1", basename(case.worms.bedg.files)))
+case.worms.bedg.files <- as.vector(df_order[with(df_order, order(id_num)), "case.worms.bedg.files"])
 
 scores_bedgr_unc16 <- sapply (case.worms.bedg.files, y <- function (x) { data <- read.table (x)                                                      
                                                                          return (data$V4)

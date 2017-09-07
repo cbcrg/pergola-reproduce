@@ -82,6 +82,10 @@ library('Sushi')
 ## Read bedGraph files
 bedg_files <- list.files(path=path2bedg_files, pattern="^bedg*", full.names=TRUE)
 
+df_order <- as.data.frame(bedg_files)
+df_order$id_num <- as.numeric(sub("bedg.str[1-2].(.*?)\\.bedGraph", "\\1", basename(bedg_files)))
+bedg_files <- as.vector(df_order[with(df_order, order(id_num)), "bedg_files"])
+
 unite_scale <- function (v, min=-400, max=400) {
     if (v < -400 & v != -10000) { return (1) }
     else if (v > 400 ) { return (1) }

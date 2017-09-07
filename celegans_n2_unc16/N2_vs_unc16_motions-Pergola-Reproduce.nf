@@ -409,7 +409,7 @@ process heat_and_density_plot {
     file (str2_p) from str2_bed_paused
 
     // This might be simplied as in the melanogaster example
-	file (str1_bedGraph_heatmap_list) from str1_bedGraph_heatmap.toSortedList()
+    file (str1_bedGraph_heatmap_list) from str1_bedGraph_heatmap.toSortedList()
     file (str2_bedGraph_heatmap_list) from str2_bedGraph_heatmap.toSortedList()
     
   	output:
@@ -432,11 +432,12 @@ process heat_and_density_plot {
   	
   	a=1
   	for bedg in ${str2_bedGraph_heatmap_list}
-      do
+      	do
       	  cp \${bedg} str2/bedg.str2.\$a.bedGraph
-  		  
-  		  let a=a+1
-  	  done
+  	  { echo -e "<track name=\${a} description=\${a} visibility=full>"; cat \$bedg; } > \$bedg.new
+          mv \$bedg{.new,} 
+  	  let a=a+1
+      	done
   	
   	path_str1=`pwd`"/str1"
   	path_str2=`pwd`"/str2"
