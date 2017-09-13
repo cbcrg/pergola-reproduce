@@ -57,7 +57,7 @@ nextflow run melanogaster_GAL4-Pergola-Reproduce.nf \
   --var_dir='small_data/perframe_TrpA/' \
   --variables="dnose2ell dtheta velmag" \
   --mappings='small_data/jaaba2pergola.txt' \
-  --output='TrpA'
+  --output='TrpA' \
   -with-docker
 
 nextflow run melanogaster_GAL4-Pergola-Reproduce.nf \
@@ -65,7 +65,7 @@ nextflow run melanogaster_GAL4-Pergola-Reproduce.nf \
   --var_dir='small_data/perframe_pBDPGAL4/' \
   --variables="dnose2ell dtheta velmag" \
   --mappings='small_data/jaaba2pergola.txt' \
-  --output='pBDPGAL4'
+  --output='pBDPGAL4' \
   -with-docker
 */
 
@@ -134,12 +134,23 @@ process frac_time_behavior {
     file 'tr*.bed' into bed_score_cov
     file 'chrom.sizes' into chrom_sizes
     set 'results_score', tag_group into results_bed_score, results_bed_score_2, results_bed_score_3
+    set 'results_score_igv', tag_group into results_bed_score_igv
 
     """
     cov_fraction_time_behavior.py -s ${scores} -m  ${mapping_file} -t ${tag_group}
     mkdir results_score
+    mkdir results_score_igv
     # mv *.bed results_score/
-    cp *.bed results_score/
+
+    for f in *.bed
+    do
+        cat \${f} | sed 's/chase/\"\"/g' > \${f}.tmp
+        cp \${f}.tmp results_score/\${f}
+        mv \${f}.tmp results_score_igv/"`echo \${f} | sed s/L4//g | sed s/[a-z]*// | sed s/_//g | sed s/.bed//g | sed s/[a-zA-Z]//g`".bed
+
+    done
+
+    # cp *.bed results_score/
     """
 }
 
@@ -207,7 +218,7 @@ process jaaba_scores_vs_variables {
   	set file (scores), val (behavior_strain), val (var) from score_files_tag_comp_var
   	file ('variable_d') from variable_dir_scores.first()
   	//each var from variables_list
-        file mapping_file
+    file mapping_file
 
   	output:
   	set file('results_annot'), var into annot_vs_non_annot_result
