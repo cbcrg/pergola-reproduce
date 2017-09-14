@@ -416,17 +416,21 @@ process heat_and_density_plot {
     file 'heatmap_str1_str2.tiff' into heatmap
     file ('results_bedgr1') into results_bedgr1
     file ('results_bedgr2') into results_bedgr2
+    file ('results_bedgr1_igv') into results_bedgr1_igv
+    file ('results_bedgr2_igv') into results_bedgr2_igv
 
   	"""  	
   	mkdir str1
   	mkdir str2
-  	
+  	mkdir igv_str1
+  	mkdir igv_str2
   	a=1
   	
   	for bedg in ${str1_bedGraph_heatmap_list}
       do
       	  cp \${bedg} str1/bedg.str1.\$a.bedGraph
-  		  
+  		  { echo -e "<track name=\${a} description=\${a} visibility=full>"; cat \$bedg; } > igv_str1/\$bedg.new
+  		  mv igv_str1/\$bedg{.new,}
   		  let a=a+1
   	  done
   	
@@ -434,9 +438,9 @@ process heat_and_density_plot {
   	for bedg in ${str2_bedGraph_heatmap_list}
       	do
       	  cp \${bedg} str2/bedg.str2.\$a.bedGraph
-  	  { echo -e "<track name=\${a} description=\${a} visibility=full>"; cat \$bedg; } > \$bedg.new
-          mv \$bedg{.new,} 
-  	  let a=a+1
+  	      { echo -e "<track name=\${a} description=\${a} visibility=full>"; cat \$bedg; } > igv_str2/\$bedg.new
+          mv igv_str2/\$bedg{.new,}
+  	      let a=a+1
       	done
   	
   	path_str1=`pwd`"/str1"
@@ -450,6 +454,9 @@ process heat_and_density_plot {
 
   	mv \$path_str1 results_bedgr1/
   	mv \$path_str2 results_bedgr2/
+
+  	mv `pwd`"/igv_str1" results_bedgr1_igv/
+  	mv `pwd`"/igv_str2" results_bedgr2_igv/
   	"""
 }
 
@@ -596,9 +603,23 @@ result_dir_bedGraph.with {
     println "Created: $result_dir_bedGraph"
 } 
 */
-bedGraph_loc_no_nas.subscribe {   
+/*
+bedGraph_loc_no_nas.subscribe {
     bedGraph_file = it[0]
     bedGraph_file.copyTo (result_dir_IGV.resolve ( it[1] + "." + it[2] + ".bedGraph" ) )
+}
+*/
+results_bedgr1_igv.subscribe {
+    it.copyTo (result_dir_IGV.resolve ( it[1] + "." + it[2] + ".bedGraph" ) )
+}
+
+results_bedgr1_igv.subscribe {
+    it.copyTo (result_dir_IGV) )
+}
+
+results_bedgr2_igv.subscribe {
+    bedGraph_file = it[0]
+    bedGraph_file.copyTo (result_dir_IGV) )
 }
 
 result_dir_IGV_intersect = file("$result_dir_IGV/motion_intersected")
