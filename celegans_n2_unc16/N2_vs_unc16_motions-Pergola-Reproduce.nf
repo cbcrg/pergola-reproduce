@@ -35,6 +35,7 @@ params.mappings_bed      = "$baseDir/small_data/mappings/bed2pergola.txt"
 params.mappings_motion   = "$baseDir/small_data/mappings/worms_motion2p.txt"
 params.output            = "results/"
 params.tag_results       = ""
+params.image_format      = "tiff"
 
 log.info "C. elegans locomotion phenotypes comparison - N F  ~  version 0.1"
 log.info "========================================================="
@@ -45,6 +46,7 @@ log.info "mappings bed                : ${params.mappings_bed}"
 log.info "mappings motion             : ${params.mappings_motion}"
 log.info "output                      : ${params.output}"
 log.info "tag results                 : ${params.tag_results}"
+log.info "image format                : ${params.image_format}"
 log.info "\n"
 
 /*
@@ -98,6 +100,11 @@ Channel
 tag_res = "${params.tag_results}"
 tag_str1 = "strain1_worms"
 tag_str2 = "strain2_worms"
+
+/*
+ * Read image format
+ */
+image_format = "${params.image_format}"
 
 /*
  * Creates a channel with file content and name of input file without spaces
@@ -428,18 +435,23 @@ process heat_and_density_plot {
   	
   	for bedg in ${str1_bedGraph_heatmap_list}
       do
-      	  cp \${bedg} str1/bedg.str1.\$a.bedGraph
-  		  { echo -e "<track name=\${a} description=\${a} visibility=full>"; cat \$bedg; } > igv_str1/\$bedg.new
-  		  mv igv_str1/\$bedg{.new,}
+      	  cp \${bedg} str1/bedg.str1.\${a}.bedGraph
+  		  { echo -e "track name=\${a} description=\${a} visibility=full"; cat \$bedg; } > igv_str1/\${a}.\$bedg.new
+  		  cat igv_str1/\${a}.\$bedg.new | sed 's/-10000/0/g' > igv_str1/\${a}.\$bedg
+  		  rm igv_str1/*.new
+  		  # mv igv_str1/\${a}.\$bedg{.new,}
   		  let a=a+1
   	  done
   	
   	a=1
   	for bedg in ${str2_bedGraph_heatmap_list}
       	do
-      	  cp \${bedg} str2/bedg.str2.\$a.bedGraph
-  	      { echo -e "<track name=\${a} description=\${a} visibility=full>"; cat \$bedg; } > igv_str2/\$bedg.new
-          mv igv_str2/\$bedg{.new,}
+      	  cp \${bedg} str2/bedg.str2.\${a}.bedGraph
+  	      { echo -e "track name=\${a} description=\${a} visibility=full"; cat \$bedg; } > igv_str2/\${a}.\$bedg.new
+  	      cat igv_str2/\${a}.\$bedg.new | sed 's/-10000/0/g' > igv_str2/\${a}.\$bedg
+  	      rm igv_str2/*.new
+  	      # mv igv_str2/\${a}.\$bedg{.new,}
+
   	      let a=a+1
       	done
   	
@@ -450,7 +462,8 @@ process heat_and_density_plot {
   	heatmap_density_pheno_feature.R --path_str1=\$path_str1 --path_str2=\$path_str2 \
   		   --file_f_str1=${str1_f} --file_f_str2=${str2_f} \
   		   --file_b_str1=${str1_b} --file_b_str2=${str2_b} \
-  		   --file_p_str1=${str1_p} --file_p_str2=${str2_p} 
+  		   --file_p_str1=${str1_p} --file_p_str2=${str2_p} \
+  		   --image_format=${image_format}
 
   	mv \$path_str1 results_bedgr1/
   	mv \$path_str2 results_bedgr2/
@@ -470,11 +483,11 @@ process heatmap_sushi {
     set var_bedg_dir, tag_group from results_bedgr_sushi
 
     output:
-    file "*.pdf" into sushi_heatmap
+    file "*.${image_format}" into sushi_heatmap
 
     """
-    heatmap_sushi.R --path_bedgr=${var_bedg_dir}
-    mv sushi_var.pdf "sushi_heatmap_"${tag_group}".pdf"
+    heatmap_sushi.R --path_bedgr=${var_bedg_dir} --image_format=${image_format}
+    mv "sushi_var.${image_format}" "sushi_heatmap_${tag_group}.${image_format}"
     """
 }
 
@@ -608,19 +621,32 @@ bedGraph_loc_no_nas.subscribe {
     bedGraph_file = it[0]
     bedGraph_file.copyTo (result_dir_IGV.resolve ( it[1] + "." + it[2] + ".bedGraph" ) )
 }
-*/
+
+
 results_bedgr1_igv.subscribe {
     it.copyTo (result_dir_IGV.resolve ( it[1] + "." + it[2] + ".bedGraph" ) )
 }
+*/
 
 results_bedgr1_igv.subscribe {
-    it.copyTo (result_dir_IGV) )
+    it.copyTo (result_dir_IGV)
+}
+
+results_bedgr2_igv.subscribe {
+    it.copyTo (result_dir_IGV)
+}
+
+/*
+results_bedgr1_igv.subscribe {
+    bedGraph_file = it[0]
+    bedGraph_file.copyTo (result_dir_IGV)
 }
 
 results_bedgr2_igv.subscribe {
     bedGraph_file = it[0]
-    bedGraph_file.copyTo (result_dir_IGV) )
+    bedGraph_file.copyTo (result_dir_IGV)
 }
+*/
 
 result_dir_IGV_intersect = file("$result_dir_IGV/motion_intersected")
 

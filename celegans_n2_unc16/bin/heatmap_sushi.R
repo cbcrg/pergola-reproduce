@@ -41,10 +41,11 @@ if("--help" %in% args) {
         
         Arguments:
         --path_bedgr=path_to_files  - character  
-        --help                   - print this text
+        --image_format=image_format - character
+        --help                      - print this text
         
-        Example: ##CHANGE
-        ./plot_speed_motion_mean.R --path_bedgr=\"path_to_files\" \n")
+        Example:
+        ./plot_speed_motion_mean.R --path_bedgr=\"path_to_files\" --image_format=\"image_format\" \n")
     
     q (save="no")
 }
@@ -72,12 +73,24 @@ names (argsL) <- argsDF$V1
     }
 }
 
+{
+    if (is.null (argsL$image_format))
+    {
+        image_format <- ".tiff"
+        warning ("[Warning]: format for plots not provided, default tiff")        
+    }
+    else
+    {
+        image_format <- argsL$image_format
+    }
+}
+
 # ## Loading libraries
 library('Sushi')
 
 ## bedgraph behavioral measures files
 # path2bedg_files <- "/Users/jespinosa/git/pergola-paper-reproduce/celegans_n2_unc16/results/results_bedgr1/"
-
+# path2bedg_files<- "/Users/jespinosa/scratch/b4/a5db1241fd345a668a8e8234ee595b/results_bedgr1"
 #############################
 ## Read bedGraph files
 bedg_files <- list.files(path=path2bedg_files, pattern="^bedg*", full.names=TRUE)
@@ -108,7 +121,23 @@ chrom            = "chr1"
 chromstart       = 0
 chromend         = 29002
 
-pdf ( paste("sushi_var", ".pdf", sep="") , height=10, width=20)
+{
+    if (image_format == 'tiff' | image_format == 'tif') {
+        tiff(paste("sushi_var", ".", image_format, sep="") , height=10, width=20, units="cm", res=300)
+        size_lab <- 0.3
+    }
+    else if (image_format == 'pdf') {        
+        pdf(paste("sushi_var", ".", image_format, sep="") , height=10, width=20)
+        size_lab <- 0.5
+    }
+    else if (image_format == 'png') {        
+        png(paste("sushi_var", ".", image_format, sep=""))
+        size_lab <- 0.3
+    }
+    else {
+        stop (paste("Unknow image file format:", image_format, sep=" "))
+    }
+}
 
 ## adding a n empty plots for title
 n=3
@@ -128,7 +157,7 @@ for (bedg_i in seq_along(data_bedgraph_variable)) {
             row='supplied',  
             color= data_bedgraph_variable[[bedg_i]]$color)
     
-    mtext(j, side=2, cex=0.5)
+    mtext(j, side=2, cex=size_lab)
     i=i+1
     j=j+1
 }

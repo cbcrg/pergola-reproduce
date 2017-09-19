@@ -65,11 +65,9 @@ if("--help" %in% args) {
       --file_b_str2=file_bacward_str2  - character
       --file_p_str1=file_paused_str1   - character
       --file_p_str2=file_paused_str2   - character
-      --help                           - print this text
-      
-      Example:
-      ./plot_speed_motion_mean.R --path_str1=\"path_to_files_str1\" --path_str2=\"list_to_files_str2\" \n")
-  
+      --image_format=image_format      - character
+      --help                           - print this text")
+     
   q (save="no")
 }
 
@@ -170,6 +168,18 @@ names (argsL) <- argsDF$V1
   else
   {
     file_p_str2 <- argsL$file_p_str2
+  }
+}
+
+{
+  if (is.null (argsL$image_format))
+  {
+    image_format <- ".tiff"
+    warning ("[Warning]: format for plots not provided, default tiff")
+  }
+  else
+  {
+    image_format <- argsL$image_format
   }
 }
 
@@ -338,7 +348,22 @@ plot_str1_str2_paused <- plot_density (df_p_bed_filt, dir="paused")
 plot_str1_str2_back <- plot_density (df_b_bed_filt, dir="back")
 
 ###### Plotting
-tiff("heatmap_str1_str2.tiff", width = 18 , height = 14, units = "cm", res=300)
+# tiff("heatmap_str1_str2.tiff", width = 18 , height = 14, units = "cm", res=300)
+
+{
+  if (image_format == 'tiff' | image_format == 'tif') {
+    tiff(paste("heatmap_str1_str2.", image_format, sep=""), width = 18 , height = 14, units = "cm", res=300)
+  }
+  else if (image_format == 'pdf') {
+    pdf(paste("heatmap_str1_str2.", image_format, sep=""), width = 18 , height = 14)
+  }
+  else if (image_format == 'png') {
+    png(paste("heatmap_str1_str2.", image_format, sep=""))
+  }
+  else {
+    stop (paste("Unknow image file format:", image_format, sep=" "))
+  }
+}
 
 nrows <- 3
 ncols <- 3
