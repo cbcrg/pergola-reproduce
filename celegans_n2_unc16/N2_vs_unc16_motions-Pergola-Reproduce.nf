@@ -420,7 +420,7 @@ process heat_and_density_plot {
     file (str2_bedGraph_heatmap_list) from str2_bedGraph_heatmap.toSortedList()
     
   	output:
-    file 'heatmap_str1_str2.tiff' into heatmap
+    file "heatmap_str1_str2.${image_format}" into heatmap
     file ('results_bedgr1') into results_bedgr1
     file ('results_bedgr2') into results_bedgr2
     file ('results_bedgr1_igv') into results_bedgr1_igv
@@ -553,10 +553,12 @@ process plot_distro {
   	output:
   	// R creates a Rplots.pdf that is way we have to specify the tag "out" 
   	//set '*.png', strain, pheno_feature, direction into plots_pheno_feature_str1_str2
-    set '*out.pdf', strain, pheno_feature, direction into plots_pheno_feature_str1_str2
-    
+    set "*out.${image_format}", strain, pheno_feature, direction into plots_pheno_feature_str1_str2
+
   	"""
-  	plot_pheno_feature_distro_paper_version.R --bed_file_str1=${intersect_feature_motion_str1} --bed_file_str2=${intersect_feature_motion_strain2} 
+  	plot_pheno_feature_distro_paper_version.R --bed_file_str1=${intersect_feature_motion_str1} \
+  	    --bed_file_str2=${intersect_feature_motion_strain2} \
+  	    --image_format=${image_format}
   	"""
 }
 

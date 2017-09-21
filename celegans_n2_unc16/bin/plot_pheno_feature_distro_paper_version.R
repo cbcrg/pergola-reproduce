@@ -51,11 +51,12 @@ if("--help" %in% args) {
       
       Arguments:
       --bed_file_str1=bed_file_str1  - character  
-	    --bed_file_str2=bed_file_str2  - character  
+	  --bed_file_str2=bed_file_str2  - character 
+      --image_format=image_format    - character
       --help                         - print this text
       
       Example:
-      ./plot_speed_motion_mean.R --bed_file_str1=\"path_to_file\" --bed_file_str2=\"path_to_file\" \n")
+      ./plot_speed_motion_mean.R --bed_file_str1=\"path_to_file\" --bed_file_str2=\"path_to_file\" --image_format=\"image_format\" \n")
   
   q (save="no")
 }
@@ -94,6 +95,18 @@ names (argsL) <- argsDF$V1
   }
 }
 
+# plot_format
+{
+    if (is.null (argsL$image_format))
+    {
+        image_format <- "tiff"
+        warning ("[Warning]: format for plots not provided, default tiff")        
+    }
+    else
+    {
+        image_format <- argsL$image_format
+    }
+}
 read_bed <- function (bed_file) {
   info = file.info(bed_file)
   if (info$size == 0) {
@@ -142,11 +155,11 @@ plot_height <- 12
 font <- "Arial"
 dpi <- 300
 name_file <- basename(bed_file_str1)
-name_out <- paste(name_file, ".png", sep="")
+# name_out <- paste(name_file, ".png", sep="")
 # file_format <- ".png"
-file_format <- ".out.pdf"
+# file_format <- ".out.pdf"
 
-name_out <- paste(name_file, file_format, sep="")
+name_out <- paste(name_file, ".out.", image_format, sep="")
 
 # From the maximun and minimun value I add a shift to set axes limits
 shift_axes <- 100

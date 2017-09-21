@@ -174,7 +174,7 @@ names (argsL) <- argsDF$V1
 {
   if (is.null (argsL$image_format))
   {
-    image_format <- ".tiff"
+    image_format <- "tiff"
     warning ("[Warning]: format for plots not provided, default tiff")
   }
   else
@@ -348,17 +348,17 @@ plot_str1_str2_paused <- plot_density (df_p_bed_filt, dir="paused")
 plot_str1_str2_back <- plot_density (df_b_bed_filt, dir="back")
 
 ###### Plotting
-# tiff("heatmap_str1_str2.tiff", width = 18 , height = 14, units = "cm", res=300)
-
+plot_name <- "heatmap_str1_str2"
+    
 {
   if (image_format == 'tiff' | image_format == 'tif') {
-    tiff(paste("heatmap_str1_str2.", image_format, sep=""), width = 18 , height = 14, units = "cm", res=300)
+    tiff(paste(plot_name, ".", image_format, sep=""), width = 18 , height = 14, units = "cm", res=300)
   }
   else if (image_format == 'pdf') {
-    pdf(paste("heatmap_str1_str2.", image_format, sep=""), width = 18 , height = 14)
+    pdf(paste(plot_name, ".", image_format, sep=""), width = 18 , height = 14)
   }
   else if (image_format == 'png') {
-    png(paste("heatmap_str1_str2.", image_format, sep=""))
+    png(paste(plot_name, ".", image_format, sep=""), width = 18 , height = 14, units = "cm", res=300)
   }
   else {
     stop (paste("Unknow image file format:", image_format, sep=" "))
