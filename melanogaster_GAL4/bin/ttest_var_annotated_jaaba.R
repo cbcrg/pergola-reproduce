@@ -40,12 +40,13 @@ if("--help" %in% args) {
         ttest_var_annotated_jaaba
         
         Arguments:
-        --path2files=someValue     - character, path to read bedGraph files        
-        --variable_name=someValue  - character, variable name
-        --help                     - print this text
+        --path2files=someValue      - character, path to read bedGraph files        
+        --variable_name=someValue   - character, variable name
+        --image_format=image_format - character
+        --help                      - print this text
         
         Example:
-        ./ttest_var_annotated_jaaba.R --path2files=\"/foo/variables\" --variable_name=\"var_name\"\n")
+        ./ttest_var_annotated_jaaba.R --path2files=\"/foo/variables\" --variable_name=\"var_name\" --image_format=\"image_format\" \n")
     
     q (save="no")
 }
@@ -83,6 +84,19 @@ names (argsL) <- argsDF$V1
     else
     {        
         variable_name <- argsL$variable_name
+    }
+}
+
+# plot image format
+{
+    if (is.null (argsL$image_format))
+    {
+        image_format <- "tiff"
+        warning ("[Warning]: format for plots not provided, default tiff")
+    }
+    else
+    {
+        image_format <- argsL$image_format
     }
 }
 
@@ -152,10 +166,7 @@ ylim1 <- c(min(ylim_a, ylim_no_a), max(ylim_a, ylim_no_a))
 ## colors
 cbb_palette <- c("#D55E00", "#0072B2", "#E69F00", "#000000", "#56B4E9", "#009E73", "#F0E442", "#CC79A7")
 
-# name_out <- paste (variable, ".", "png", sep="")
-name_out <- paste (variable, ".", "pdf", sep="")
-
-# df_values [df_values$value > 100,]
+name_out <- paste (variable, ".", image_format, sep="")
 
 ggplot(df_values, aes(id, value, fill=id)) + geom_boxplot(notch=TRUE) + 
 #     labs (#title = "Jaaba annotated vs. non-annotated intervals\n", 

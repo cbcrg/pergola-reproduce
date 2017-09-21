@@ -40,13 +40,14 @@ if("--help" %in% args) {
         sushi_plot_jaaba
         
         Arguments:
-        --path2variables=someValue - character, path to read bedGraph files
-        --path2scores=someValue    - character, path to read bed files        
-        --variable_name=someValue  - character, variable name
-        --help                     - print this text
+        --path2variables=someValue  - character, path to read bedGraph files
+        --path2scores=someValue     - character, path to read bed files        
+        --variable_name=someValue   - character, variable name
+        --image_format=image_format - character
+        --help                      - print this text
         
         Example:
-        ./sushi_plot_jaaba.R --path2variables=\"/foo/variables\" --path2scores=\"/foo/scores\" --variable_name=\"var_name\"\n")
+        ./sushi_plot_jaaba.R --path2variables=\"/foo/variables\" --path2scores=\"/foo/scores\" --variable_name=\"var_name\" --image_format=\"image_format\"\n")
     
     q (save="no")
 }
@@ -99,6 +100,19 @@ names (argsL) <- argsDF$V1
     }
 }
 
+# plot image format
+{
+    if (is.null (argsL$image_format))
+    {
+        image_format <- "tiff"
+        warning ("[Warning]: format for plots not provided, default tiff")
+    }
+    else
+    {
+        image_format <- argsL$image_format
+    }
+}
+
 ## Loading libraries
 library(utils)
 source("https://bioconductor.org/biocLite.R")
@@ -142,7 +156,25 @@ chromend         = 25000
 
 title <- paste("  ", variable_name, sep="")
 
-png(paste("sushi_jaaba_scores_annot_", variable_name, ".png", sep=""))
+plot_name <- "sushi_jaaba_scores_annot_"
+
+{
+    if (image_format == 'tiff' | image_format == 'tif') {
+        tiff(paste(plot_name, variable_name, ".", image_format, sep=""))
+        size_lab <- 0.3
+    }
+    else if (image_format == 'pdf') {        
+        pdf(paste(plot_name, variable_name, ".", image_format, sep=""))
+        size_lab <- 0.5
+    }
+    else if (image_format == 'png') {        
+        png(paste(plot_name, variable_name, ".", image_format, sep=""))
+        size_lab <- 0.3
+    }
+    else {
+        stop (paste("Unknow image file format:", image_format, sep=" "))
+    }
+}
 
 split.screen (c(2, 1)) 
 

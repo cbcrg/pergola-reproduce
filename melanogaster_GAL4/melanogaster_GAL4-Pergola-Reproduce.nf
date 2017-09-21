@@ -26,12 +26,13 @@
  * Script to reproduce Pergola paper Jaaba annotated data analysis
  */
 
-params.scores      = "$baseDir/small_data/scores/scores_chase.mat"
-params.var_dir     = "$baseDir/small_data/perframe/"
+params.scores       = "$baseDir/small_data/scores/scores_chase.mat"
+params.var_dir      = "$baseDir/small_data/perframe/"
 params.var_dir_test = "$baseDir/"
-params.variables   = "velmag"
-params.mappings    = "$baseDir/small_data/jaaba2pergola.txt"
-params.output      = "results/"
+params.variables    = "velmag"
+params.mappings     = "$baseDir/small_data/jaaba2pergola.txt"
+params.output       = "results/"
+params.image_format = "tiff"
 
 log.info "drosophila_jaaba - Pergola - Reproduce  -  version 0.1"
 log.info "====================================="
@@ -40,6 +41,7 @@ log.info "variables directory    : ${params.var_dir}"
 log.info "variables to run       : ${params.variables}"
 log.info "mappings               : ${params.mappings}"
 log.info "output                 : ${params.output}"
+log.info "image format           : ${params.image_format}"
 log.info "\n"
 
 // Example command to run the script with the toy data provided in the repository
@@ -122,6 +124,11 @@ else {
 }
 
 /*
+ * Read image format
+ */
+image_format = "${params.image_format}"
+
+/*
  * We use genome coverage to obtain the fraction of time performing the behavior
  */
 process frac_time_behavior {
@@ -199,10 +206,13 @@ process sushi_plot {
     set scores_bed_dir, tag_group from results_bed_score.first()    
 
     output:
-    file "sushi_jaaba_scores_annot_${var}.png" into sushi_plot
+    file "sushi_jaaba_scores_annot_${var}.${image_format}" into sushi_plot
 
     """
-    sushi_pergola_bedAndBedGraph.R --path2variables=${var_bedg_dir} --path2scores=${scores_bed_dir} --variable_name=${var}
+    sushi_pergola_bedAndBedGraph.R --path2variables=${var_bedg_dir} \
+         --path2scores=${scores_bed_dir} \
+         --variable_name=${var} \
+         --image_format=${image_format}
     """
 }
 
@@ -242,13 +252,16 @@ process sushi_plot_highlight_bg {
     set file (bedGr_dir), val (var), val (behavior_strain) from bedGr_to_sushi
 
     output:
-    set "*.pdf", var, behavior_strain into sushi_plot2
-
+    //set "*.pdf", var, behavior_strain into sushi_plot2
+    set "*.${image_format}", var, behavior_strain into sushi_plot2
     //script:
     //behavior_strain.println()
 
     """
-    sushi_pergola_BedGraph_highlight.R --path2variables=${bedGr_dir} --variable_name=${var} --behavior_strain=${behavior_strain}
+    sushi_pergola_BedGraph_highlight.R --path2variables=${bedGr_dir} \
+        --variable_name=${var} \
+        --behavior_strain=${behavior_strain} \
+        --image_format=${image_format}
     """
 }
 
@@ -258,11 +271,15 @@ process sushi_plot_behavior_annot {
     set scores_bed_dir, tag_group from results_bed_score_2
 
     output:
-    file "*.pdf" into sushi_plot_annot
+    //file "*.pdf" into sushi_plot_annot
+    file "*.${image_format}" into sushi_plot_annot
 
     """
-    sushi_pergola_bed.R --path2scores=${scores_bed_dir}
-    mv sushi_jaaba_annot.pdf "sushi_jaaba_annot_"${tag_group}".pdf"
+    sushi_pergola_bed.R --path2scores=${scores_bed_dir} \
+        --image_format=${image_format}
+
+    # mv sushi_jaaba_annot.pdf "sushi_jaaba_annot_"${tag_group}".pdf"
+    mv "sushi_jaaba_annot.${image_format}" "sushi_jaaba_annot_${tag_group}.${image_format}"
     """
 }
 
@@ -272,11 +289,14 @@ process gviz_plot_behavior_var {
     set var_bedg_dir, var_name from bedGr_to_gviz
 
     output:
-    file "*.tiff" into gviz_plot_annot
+    file "*.${image_format}" into gviz_plot_annot
 
     """
-    melanogaster_gviz_var.R  --path2variables=${var_bedg_dir} --variable_name=${var_name}
-    mv gviz_jaaba_var.tiff "gviz_jaaba_var_"${var_name}".tiff"
+    melanogaster_gviz_var.R  --path2variables=${var_bedg_dir} \
+        --variable_name=${var_name} \
+        --image_format=${image_format}
+
+    mv "gviz_jaaba_var.${image_format}" "gviz_jaaba_var_${var_name}.${image_format}"
     """
 }
 
@@ -286,30 +306,36 @@ process gviz_plot_behavior_annot {
     set scores_bed_dir, tag_group from results_bed_score_3
 
     output:
-    file "*.tiff" into gviz_plot_var
+    file "*.${image_format}" into gviz_plot_var
 
     """
-    melanogaster_gviz_annotations.R --path_bed_files=${scores_bed_dir}
-    mv gviz_jaaba_annot.tiff "gviz_jaaba_annot_"${tag_group}".tiff"
+    melanogaster_gviz_annotations.R --path_bed_files=${scores_bed_dir} \
+        --image_format=${image_format}
+
+    mv "gviz_jaaba_annot.${image_format}" "gviz_jaaba_annot_${tag_group}.${image_format}"
     """
 }
+
 
 process sign_variable_annotation {
     input:
     set file(dir_annot_vs_non_annot), var from annot_vs_non_annot_result
 
     output:
-    file "${var}.pdf"
+    //file "${var}.pdf"
+    file "${var}.${image_format}"
     stdout into FC_pvalue
 
     """
-    ttest_var_annotated_jaaba.R --path2files=${dir_annot_vs_non_annot} --variable_name=${var}
+    ttest_var_annotated_jaaba.R --path2files=${dir_annot_vs_non_annot} \
+        --variable_name=${var} \
+        --image_format=${image_format}
     """
 }
 
 FC_pvalues_collected = FC_pvalue
                         .collectFile(name: 'FC_pvalue.csv', newLine: false)
-
+/*
 process plot_volcano {
     input:
     file pvalues_FC from FC_pvalues_collected
@@ -323,3 +349,4 @@ process plot_volcano {
     """
 
 }
+*/

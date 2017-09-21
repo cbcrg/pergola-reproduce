@@ -42,10 +42,11 @@ if("--help" %in% args) {
       Arguments:
       --path2variables=path_to_bedgr_files - character
       --variable_name=someValue            - character, variable name
+      --image_format=\"image_format\"
       --help                               - print this text
       
       Example:
-      ./melanogaster_gviz_var.R --path_bed_files=\"path_bed_files\" \n")      
+      ./melanogaster_gviz_var.R --path_bed_files=\"path_bed_files\" --image_format=\"image_format\" \n")      
       
   q (save="no")
 }
@@ -99,6 +100,19 @@ names (argsL) <- argsDF$V1
   }
 }
 
+# plot image format
+{
+    if (is.null (argsL$image_format))
+    {
+        image_format <- "tiff"
+        warning ("[Warning]: format for plots not provided, default tiff")
+    }
+    else
+    {
+        image_format <- argsL$image_format
+    }
+}
+
 ## Loading libraries
 # library(utils)
 # source("https://bioconductor.org/biocLite.R")
@@ -120,7 +134,7 @@ bedgraph_tracks <- lapply(bedgraph.var_files, function (bedgraph) {
 #   id <- gsub("values_", "", gsub(paste("_", variable_name, ".bedGraph", sep=""), "", basename(bedgraph)))
 #   print (id)
   bedgraph_GR <- import(bedgraph, format = "bedGraph")
-  tr <- DataTrack(bedgraph_GR, type="a",
+  tr <- DataTrack(bedgraph_GR, type="a", ylim = c(0, 50),
             #background.title = l_gr_color[[i_group_exp]],           
             showAxis = F, name = id)
   return (tr)
@@ -129,83 +143,23 @@ bedgraph_tracks <- lapply(bedgraph.var_files, function (bedgraph) {
 names(bedgraph_tracks) <- as.numeric(gsub(".+tr_(\\d+)(_.+$)", "\\1", bedgraph.var_files))
 bedgraph_tracks <- bedgraph_tracks[as.character(1:length(bedgraph.var_files))]
 
-name_file <- "gviz_jaaba_var.tiff"
-tiff(name_file, width = 45 , height = 34, units = "cm", res=300)
+plot_name <- "gviz_jaaba_var"
+
+{
+    if (image_format == 'tiff' | image_format == 'tif') {
+        tiff(paste(plot_name, ".", image_format, sep=""),  width = 45 , height = 34, units = "cm", res=300)
+    }
+    else if (image_format == 'pdf') {        
+        pdf(paste(plot_name, ".", image_format, sep=""),  width = 45 , height = 34)
+    }
+    else if (image_format == 'png') {        
+        png(paste(plot_name, ".", image_format, sep=""), width = 45 , height = 34, units = "cm", res=300)
+    }
+    else {
+        stop (paste("Unknow image file format:", image_format, sep=" "))
+    }
+}
+
 plotTracks(bedgraph_tracks, stacking="dense", collapse=FALSE, shape = "box", col="red")
+
 dev.off()
-
-#######################
-### Lo que habria que hacer es en la fucnion leerlas a la vez y entonces dentro de ella crear la data track 
-### con las dos group lo que sea
-
-# path2bedg_files <- "/Users/jespinosa/scratch/ba/c0bb5e7aac265be4a11d77cba09e9f/results_bedGr"
-# # path2bedg_files <- "/Users/jespinosa/scratch/94/09f279eec46db44d013433941f7326/results_var"
-# variable_name <- "velmag"
-# base_folder <- path2bedg_files
-# # chase.bedgraph.variable.files <- mixedsort(list.files(base_folder, pattern=paste("values.*", variable_name, ".bedGraph$", sep=""), full.names=TRUE))
-# chase.bedgraph.variable.files.comp <- mixedsort(list.files(base_folder, pattern=paste("values.*", variable_name, "*.comp.*.bedGraph$", sep=""), full.names=TRUE))
-# 
-# ### TEST comp tracks, those no annotated as chasing
-# ## the rest are the ones annotated as chasing
-# # chase.bedgraph.variable.files <- mixedsort(list.files(base_folder, pattern=paste("values.*", variable_name, ".bedGraph$", sep=""), full.names=TRUE))
-# 
-# # bedgraph_tracks_comp <- lapply(chase.bedgraph.variable.files.comp, function (bedgraph) {
-# #   #   id <- gsub(".+tr_(\\d+)(_.+$)", "\\1", bed)
-# #   #   name_id <- gsub("values_", "", gsub(paste("_", variable_name, ".bedGraph", sep=""), "", basename(bedg)))
-# #   id <- gsub("values_", "", gsub(paste("_", variable_name, ".comp.bedGraph", sep=""), "", basename(bedgraph)))
-# #   #   id <- gsub("values_", "", gsub(paste("_", variable_name, ".bedGraph", sep=""), "", basename(bedgraph)))
-# #   print (id)
-# #   bedgraph_GR <- import(bedgraph, format = "bedGraph")
-# #   tr <- DataTrack(bedgraph_GR, type="a", #ylim = c(min_heatmap, max_heatmap),
-# #                   #background.title = l_gr_color[[i_group_exp]],
-# #                   #gradient=c(color_min, color_max), 
-# #                   showAxis = F, name = id)
-# #   
-# #   #   tr <- AnnotationTrack(bedgraph_GR, name = paste ("", id, sep="")) #,
-# #   # #                         fill=bed_GR$itemRgb)
-# #   #                       background.title = c)  
-# #   #   names(tr) <- id
-# #   return (tr)
-# # } )
-# 
-# # names(bedgraph_tracks_comp) <- as.numeric(gsub("values_", "", gsub(paste("_", variable_name, ".comp.bedGraph", sep=""), "", basename(chase.bedgraph.variable.files.comp))))
-# # bedgraph_tracks_comp <- bedgraph_tracks_comp[as.character(1:length(bedgraph.var_files))]
-# # 
-# # # collapse may allow to over the tracks with the same id 
-# # plotTracks(c(bedgraph_tracks, bedgraph_tracks_comp), stacking="dense", collapse=TRUE, shape = "box", col="red")
-# # plotTracks(c(bedgraph_tracks, bedgraph_tracks_comp), from=0, to=1000)
-# # plotTracks(c(bedgraph_tracks_comp), from=0, to=1000)
-# # plotTracks(c(bedgraph_tracks), from=0, to=1000)
-# 
-# bedgraph_tracks_annot <- lapply(chase.bedgraph.variable.files, function (bedgraph) {
-#     #   id <- gsub(".+tr_(\\d+)(_.+$)", "\\1", bed)
-#     #   name_id <- gsub("values_", "", gsub(paste("_", variable_name, ".bedGraph", sep=""), "", basename(bedg)))
-#     id <- gsub("values_", "", gsub(paste("_", variable_name, ".bedGraph", sep=""), "", basename(bedgraph)))
-#     #   id <- gsub("values_", "", gsub(paste("_", variable_name, ".bedGraph", sep=""), "", basename(bedgraph)))
-#     print (id)
-#     bedgraph_GR <- import(bedgraph, format = "bedGraph")
-#     tr <- DataTrack(bedgraph_GR, type="a", #ylim = c(min_heatmap, max_heatmap),
-#                     #background.title = l_gr_color[[i_group_exp]],
-#                     #gradient=c(color_min, color_max), 
-#                     showAxis = F, name = id)
-#     
-#     #   tr <- AnnotationTrack(bedgraph_GR, name = paste ("", id, sep="")) #,
-#     # #                         fill=bed_GR$itemRgb)
-#     #                       background.title = c)  
-#     #   names(tr) <- id
-#     return (tr)
-# } )
-# 
-# names(bedgraph_tracks_annot) <- as.numeric(gsub("values_", "", gsub(paste("_", variable_name, ".bedGraph", sep=""), "", basename(chase.bedgraph.variable.files))))
-# bedgraph_tracks_annot <- bedgraph_tracks_annot[as.character(1:length(bedgraph.var_files))]
-# 
-# # collapse may allow to over the tracks with the same id 
-# plotTracks(c(bedgraph_tracks, bedgraph_tracks_annot), stacking="dense", collapse=TRUE, shape = "box", col="red")
-# plotTracks(c(bedgraph_tracks, bedgraph_tracks_annot), from=0, to=1000)
-# plotTracks(c(bedgraph_tracks_annot), from=0, to=5000)
-# 
-# plotTracks(c(bedgraph_tracks, bedgraph_tracks_annot), 
-#            #            groups = rep(c("control", "treated"), each = 20), 
-#            from=0, to=5000)
-# plotTracks(c(bedgraph_tracks), from=0, to=1000)
-# 

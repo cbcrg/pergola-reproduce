@@ -55,10 +55,11 @@ if("--help" %in% args) {
       
       Arguments:
       --path_bed_files=path_to_bed_files - character
+      --image_format=image_format        - character
       --help                             - print this text
       
       Example:      
-      ./melanogaster_gviz_annotations.R --path_bed_files=\"path_bed_files\" \n")
+      ./melanogaster_gviz_annotations.R --path_bed_files=\"path_bed_files\" --image_format=\"image_format\" \n")
   
   q (save="no")
 }
@@ -86,6 +87,19 @@ names (argsL) <- argsDF$V1
   }
 }
 
+# plot image format
+{
+    if (is.null (argsL$image_format))
+    {
+        image_format <- "tiff"
+        warning ("[Warning]: format for plots not provided, default tiff")
+    }
+    else
+    {
+        image_format <- argsL$image_format
+    }
+}
+
 #############################
 ## Read files bed files
 bed_files <- list.files(path=path_bed_files, pattern="^tr*", full.names=TRUE)
@@ -103,7 +117,25 @@ bed_tracks <- lapply(bed_files, function (bed) {
 names(bed_tracks) <- as.numeric(gsub(".+tr_(\\d+)(_.+$)", "\\1", bed_files))
 bed_tracks <- bed_tracks[as.character(1:length(bed_files))]
 
-name_file <- "gviz_jaaba_annot.tiff"
-tiff(name_file, width = 45 , height = 34, units = "cm", res=300)
+## Plot
+plot_name <- "gviz_jaaba_annot"
+
+{
+    if (image_format == 'tiff' | image_format == 'tif') {
+        tiff(paste(plot_name, ".", image_format, sep=""), width = 45 , height = 34, units = "cm", res=300)
+    }
+    else if (image_format == 'pdf') {        
+        pdf(paste(plot_name, ".", image_format, sep=""), height=45, width=34)        
+    }
+    else if (image_format == 'png') {        
+        png(paste(plot_name, ".", image_format, sep=""),  width = 45 , height = 34, units = "cm", res=300) 
+    }
+    else {
+        stop (paste("Unknow image file format:", image_format, sep=" "))
+    }
+}
+
+# tiff(name_file, width = 45 , height = 34, units = "cm", res=300)
 plotTracks(bed_tracks, stacking="dense", from=0, collapse=FALSE, shape = "box", col=NULL) 
+
 dev.off()

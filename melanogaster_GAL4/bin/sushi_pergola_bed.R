@@ -40,11 +40,12 @@ if("--help" %in% args) {
       sushi_plot_jaaba
       
       Arguments:      
-      --path2scores=someValue    - character, path to read bed files              
-      --help                     - print this text
+      --path2scores=someValue     - character, path to read bed files
+      --image_format=image_format - character
+      --help                      - print this text
       
       Example:
-      ./sushi_pergola_bed.R --path2scores=\"/foo/scores\" \n")
+      ./sushi_pergola_bed.R --path2scores=\"/foo/scores\" --image_format=\"image_format\" \n")
   
   q (save="no")
 }
@@ -70,6 +71,19 @@ names (argsL) <- argsDF$V1
   {
     path2bed_files <- argsL$path2scores
   }
+}
+
+# plot image format
+{
+    if (is.null (argsL$image_format))
+    {
+        image_format <- "tiff"
+        warning ("[Warning]: format for plots not provided, default tiff")
+    }
+    else
+    {
+        image_format <- argsL$image_format
+    }
 }
 
 ## Loading libraries
@@ -102,8 +116,20 @@ chrom            = "chr1"
 chromstart       = 0
 chromend         = 25000
 
-# png(paste("sushi_jaaba_annot", ".png", sep=""))
-pdf ( paste("sushi_jaaba_annot", ".pdf", sep="") , height=10, width=20)
+{
+    if (image_format == 'tiff' | image_format == 'tif') {
+        tiff(paste("sushi_jaaba_annot", ".", image_format, sep=""), height=10, width=20, units="cm", res=300)
+    }
+    else if (image_format == 'pdf') {        
+        pdf(paste("sushi_jaaba_annot", ".", image_format, sep=""), height=10, width=20)        
+    }
+    else if (image_format == 'png') {        
+        png(paste("sushi_jaaba_annot", ".", image_format, sep=""))        
+    }
+    else {
+        stop (paste("Unknow image file format:", image_format, sep=" "))
+    }
+}
 
 # par(mar=c(0.1,1,2,0.1))
 par(mar=c(1, 2, 1, 2))
