@@ -48,27 +48,30 @@ log.info "\n"
 /*
 nextflow run melanogaster_GAL4-Pergola-Reproduce.nf \
   --scores='small_data/scores/scores_chase_*.mat' \
-  --var_dir='small_data/perframe/' \
+  --var_dir='small_data/perframe_pBDPGAL4/' \
   --variables="dnose2ell dtheta velmag" \
   --mappings='small_data/jaaba2pergola.txt' \
+  --output='pBDPGAL4' \
   -with-docker
+// --var_dir_test='small_data/perframe_*' \
 
 // by strain
 nextflow run melanogaster_GAL4-Pergola-Reproduce.nf \
-  --scores='small_data/scores/scores_chase_case_TrpA.mat' \
+  --scores='small_data/scores/scores_chase_*.mat' \
+  --var_dir='small_data/perframe_pBDPGAL4/' \
+  --variables="dnose2ell dtheta velmag" \
+  --mappings='small_data/jaaba2pergola.txt' \
+  --output='pBDPGAL4' \
+  -with-docker
+
+nextflow run melanogaster_GAL4-Pergola-Reproduce.nf \
+  --scores='small_data/scores/scores_chase_*.mat' \
   --var_dir='small_data/perframe_TrpA/' \
   --variables="dnose2ell dtheta velmag" \
   --mappings='small_data/jaaba2pergola.txt' \
   --output='TrpA' \
   -with-docker
 
-nextflow run melanogaster_GAL4-Pergola-Reproduce.nf \
-  --scores='small_data/scores/scores_chase_ctrl_pBDPGAL4.mat' \
-  --var_dir='small_data/perframe_pBDPGAL4/' \
-  --variables="dnose2ell dtheta velmag" \
-  --mappings='small_data/jaaba2pergola.txt' \
-  --output='pBDPGAL4' \
-  -with-docker
 */
 
 /*
@@ -81,7 +84,7 @@ if( !file(params.var_dir).exists() ) exit 1, "Missing variable directory: ${para
 
 /*
  * Create a channel for scores
- * File naming is scores_behavior_strain.map, thus tag corresponds to behavior and strain
+ * File naming is scores_behavior_strain.mat, thus tag corresponds to behavior and strain
  */
 Channel
   .fromPath( params.scores )
@@ -95,21 +98,13 @@ score_files_tag = score_files.map {
 }
 
 score_files_tag.into { score_files_tag_bed; score_files_tag_comp; score_files_print }
-score_files_print.println()
 
 /*
  * Create a channel for directory containing variables
  */
 variable_dir = Channel.fromPath( params.var_dir )
-//variable_dir_test = Channel
-//    	       	.fromPath( "${params.var_dir_test}/*.txt"  )
-//    		.set { var_dir_test_ch }
 
-//var_dir_test_ch.println()
-
-variable_dir.into { variable_dir_bg; variable_dir_scores; variable_dir_print}
-
-variable_dir_print.println()
+variable_dir.into { variable_dir_bg; variable_dir_scores }
 
 /*
  * List of variable to extract from the folder. If set to "all", all variables are extracted.
@@ -120,7 +115,7 @@ if ( params.variables == "all" ) {
   variables_list = "a absangle2wall absanglefrom1to2_anglesub absanglefrom1to2_nose2ell absdangle2wall absdtheta absdv_cor absphidiff_anglesub absphidiff_nose2ell abssmoothdtheta absthetadiff_anglesub absthetadiff_nose2ell absyaw accmag angle2wall anglefrom1to2_anglesub anglefrom1to2_nose2ell angleonclosestfly anglesub area areasmooth arena_angle arena_r b closestfly_anglesub closestfly_center closestfly_ell2nose closestfly_nose2ell closestfly_nose2ell_angle_30tomin30 closestfly_nose2ell_angle_min20to20 closestfly_nose2ell_angle_min30to30 closestfly_nose2tail corfrac_maj corfrac_min da dangle2wall danglesub darea db dcenter ddcenter ddell2nose ddist2wall ddnose2ell decc dell2nose dist2wall dnose2ell dnose2ell_angle_30tomin30 dnose2ell_angle_min20to20 dnose2ell_angle_min30to30 dnose2tail dphi dt dtheta du_cor du_ctr du_tail dv_cor dv_ctr dv_tail ecc flipdv_cor magveldiff_anglesub magveldiff_nose2ell phi phisideways signdtheta smoothdtheta theta timestamps velmag velmag_ctr velmag_nose velmag_tail veltoward_anglesub veltoward_nose2ell xnose_mm yaw ynose_mm".split(" ")
 }
 else {
-  variables_list = params.variables.split(" ")             
+  variables_list = params.variables.split(" ")
 }
 
 /*
@@ -138,9 +133,9 @@ process frac_time_behavior {
 
     output:
     stdout into fraction_time
-    file 'tr*.bed' into bed_score_cov
-    file 'chrom.sizes' into chrom_sizes
-    set 'results_score', tag_group into results_bed_score, results_bed_score_2, results_bed_score_3
+    //file 'tr*.bed' into bed_score_cov
+    //file 'chrom.sizes' into chrom_sizes
+    set 'results_score', tag_group into results_bed_score
     set 'results_score_igv', tag_group into results_bed_score_igv
 
     """
@@ -161,8 +156,10 @@ process frac_time_behavior {
     """
 }
 
+results_bed_score.filter { it[1].split("\\_")[2] == params.output }
+                 .into { results_bed_score; results_bed_score_2; results_bed_score_3; results_bed_score_test }
+
 fraction_time_comb_gr = fraction_time.collectFile()
-//fraction_time_comb_gr.println()
 
 /*
  * Compares the fraction of time spent of a given behavior on a boxplot
@@ -178,7 +175,6 @@ process comparison_fract_time {
     boxplot_fract_time.R --path2tbl_fr_time=${fraction_time_tbl}
     """
 }
-
 
 process variables_to_bedGraph {
     input:
@@ -203,7 +199,7 @@ The resulting plot is not used by the moment in the paper, eventually delete
 process sushi_plot {
     input:
     set var_bedg_dir, var from results_bedg_var
-    set scores_bed_dir, tag_group from results_bed_score.first()    
+    set scores_bed_dir, tag_group from results_bed_score.first()
 
     output:
     file "sushi_jaaba_scores_annot_${var}.${image_format}" into sushi_plot
@@ -216,7 +212,6 @@ process sushi_plot {
     """
 }
 
-//score_files_tag_comp.into { score_files_tag_comp; score_files_tag_comp2 } //del
 score_files_tag_comp_var = score_files_tag_comp
     .spread ( variables_list )
 
