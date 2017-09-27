@@ -21,13 +21,34 @@
 # pergola paper results
 ################################################################
 
-FROM r-base:3.3.2 
- 
+FROM r-base:3.3.2
+
 MAINTAINER Jose Espinosa-Carrasco <espinosacarrascoj@gmail.com>
 
-## install dependencies
-RUN apt-get update && apt-get install -y  \
+RUN apt-get update && \
+    apt-get install --fix-missing -y \
     sudo \
+    python \
+    python-pip \
+    bedtools
+
+RUN pip install pybedtools
+
+## pergola installation
+COPY pergola/pergola /pergola/pergola
+COPY pergola/requirements.txt /pergola/
+COPY pergola/setup.py /pergola/
+COPY pergola/README.md /pergola/
+
+RUN pip install -r /pergola/requirements.txt && \
+    pip install cython && \
+    pip install h5py && \
+    apt-get install -y python-scipy && \
+    cd pergola && python setup.py install
+
+## install R dependencies
+RUN apt-get update && \
+    apt-get install --fix-missing -y \
     gdebi-core \
     pandoc \
     pandoc-citeproc \
@@ -36,30 +57,19 @@ RUN apt-get update && apt-get install -y  \
     libxt-dev \
     libssl-dev \
     libxml2-dev \
-    python python-dev \
+    python-dev \
     python-distribute \
-    python-pip  \
-    gfortran \ 
+    gfortran \
     bedtools \
     libhdf5-dev
 
-## intall R packages
-RUN R -e "install.packages(c('shiny', 'rmarkdown', 'ggplot2', 'XML', 'Rcurl','cowplot', 'dplyr', 'survival', 'gridExtra', 'devtools', 'utils', 'gutils', 'gtools', 'ggrepel', 'extrafont'), repos='http://cran.rstudio.com/')" \
+## Install R packages
+RUN R -e "install.packages(c('Sushi', 'shiny', 'rmarkdown', 'ggplot2', 'XML', 'Rcurl','cowplot', 'dplyr', 'survival', 'gridExtra', 'utils', 'gutils', 'gtools', 'ggrepel', 'extrafont', 'devtools'), repos='http://cran.rstudio.com/')" \
 && Rscript -e 'source("http://bioconductor.org/biocLite.R"); biocLite("GenomicRanges"); biocLite("rtracklayer"); biocLite("Sushi");'
-
-## pergola installation
-COPY pergola/pergola /pergola/pergola
-COPY pergola/requirements.txt /pergola/
-COPY pergola/setup.py /pergola/  
-COPY pergola/README.md /pergola/ 
-
-RUN pip install -r /pergola/requirements.txt && \
-    pip install cython && \
-    pip install h5py && \
-    apt-get install -y python-scipy && \
-    cd pergola && python setup.py install
 
 # version of Gviz modified to show time instead of genomics units
 RUN R -e  'devtools::install_github("JoseEspinosa/Gviz")'
-## version of Gviz modified to show fps instead of genomics units 
+
+## version of Gviz modified to show fps instead of genomics units
 # RUN R -e  'devtools::install_github("JoseEspinosa/Gviz", ref = "fps")'
+
