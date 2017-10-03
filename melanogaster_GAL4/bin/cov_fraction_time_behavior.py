@@ -42,7 +42,12 @@ jaaba_parsers.jaaba_scores_to_csv(input_file=chase_score_f, path_w=path_out, nam
 
 scores_chase_int = intervals.IntData(tmp_track.name, map_dict=mappings_jaaba.correspondence).read()
 
-dict_bed_annotated_int = scores_chase_int.convert(mode="bed")
+data_type_col = {'chase': 'blue'}
+
+if tag_group == "chase_ctrl_pBDPGAL4":
+    data_type_col = {'chase': 'orange'}
+
+dict_bed_annotated_int = scores_chase_int.convert(mode="bed", color_restrictions=data_type_col)
 
 chr_file_n = "chrom"
 mapping.write_chr_sizes (scores_chase_int, file_n=chr_file_n)

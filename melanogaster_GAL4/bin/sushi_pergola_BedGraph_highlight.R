@@ -120,25 +120,14 @@ library('Sushi')
 library(gtools) #mixedsort
 
 ##############################
-## bedgraph row measures files
-# path2bedg_files <- "/Users/jespinosa/git/pergola-paper-reproduce/melanogaster_GAL4/results/results_bedGr/"
-# variable_name <- "dnose2ell"
+## bedgraph row measures files  
 base_folder <- path2bedg_files
 chase.bedgraph.variable.files <- mixedsort(list.files(base_folder, pattern=paste("values.*", variable_name, ".bedGraph$", sep=""), full.names=TRUE))
 chase.bedgraph.variable.files.comp <- mixedsort(list.files(base_folder, pattern=paste("values.*", variable_name, "*.comp.*.bedGraph$", sep=""), full.names=TRUE))
 
-# min_bedGraph <- 0
-# max_bedGraph <- -100000
-# 
-# round_up <- function(x,to=10) {
-#   to*(x%/%to + as.logical(x%%to))
-# }
-
 data_bedgraph_variable <- lapply(chase.bedgraph.variable.files, function (bedg) { 
   name_id <- gsub("values_", "", gsub(paste("_", variable_name, ".bedGraph", sep=""), "", basename(bedg)))  
   bedg_tbl <- read.csv(file=bedg, header=FALSE, sep="\t", stringsAsFactors=FALSE)
-#   min_bedGraph <<- round(floor(min (min_bedGraph, min(bedg_tbl$V4))),-1)
-#   max_bedGraph <<- round_up(max (max_bedGraph, max(bedg_tbl$V4)), 5)
   bedg_tbl$name <- as.numeric(name_id)
   return (bedg_tbl)
 })
@@ -147,23 +136,16 @@ data_bedgraph_variable_comp <- lapply(chase.bedgraph.variable.files.comp, functi
   name_id <- gsub("values_", "", gsub(paste("_", variable_name, ".comp.bedGraph", sep=""), "", basename(bedg)))
   bedg_tbl <- read.csv(file=bedg, header=FALSE, sep="\t", stringsAsFactors=FALSE)
   bedg_tbl$name <- as.numeric(name_id)
-#   min_bedGraph <<- round(floor(min (min_bedGraph, min(bedg_tbl$V4))),-1)
-#   max_bedGraph <<- round_up(max (max_bedGraph, max(bedg_tbl$V4)), 5)
   return (bedg_tbl)
 })
 
 ylim = boxplot.stats(do.call(rbind, data_bedgraph_variable)$V4)$stats[c(1, 5)]
 ylim_comp = boxplot.stats(do.call(rbind, data_bedgraph_variable_comp)$V4)$stats[c(1, 5)]
-ranges_plot <- c(min(ylim, ylim_comp), max(ylim, ylim_comp))
-
+# ranges_plot <- c(min(ylim, ylim_comp), max(ylim, ylim_comp))
+ranges_plot <- c(0,50)
 chrom            = "chr1"
 chromstart       = 0
 chromend         = 25000
-
-# title <- paste("  ", variable_name, sep="")
-
-# png(paste("sushi_highlight", variable_name, "_", behavior_strain, ".png", sep=""))
-#pdf ( paste("sushi_highlight", variable_name, "_", behavior_strain, ".pdf", sep="") , height=10, width=20)
 
 plot_name <- "sushi_highlight"
 
@@ -200,6 +182,15 @@ par(mar=c(0.1,1,2,0.1))
 i=1
 j=1
 
+{
+    if (behavior_strain == "chase_ctrl_pBDPGAL4") {
+        color_annot <- "#D55E00"     
+    }
+    else {
+        color_annot <- "#0072B2"
+    }
+}
+
 for (bedg_i in seq_along(data_bedgraph_variable)) {
   screen( i )
   #   par(mar=c(0.1,1,0.1,0.1))
@@ -207,9 +198,11 @@ for (bedg_i in seq_along(data_bedgraph_variable)) {
   plotBedgraph(data_bedgraph_variable_comp[[bedg_i]], chrom, chromstart, chromend,
                #                transparency=.10, 
                transparency=.50,
-               color=SushiColors(2)(2)[2], range=ranges_plot)
+               color="#009E73", range=ranges_plot)
+               #color=SushiColors(2)(2)[2], range=ranges_plot)
   plotBedgraph(data_bedgraph_variable[[bedg_i]], chrom, chromstart, chromend, transparency=.50,
-               color=SushiColors(2)(2)[1], overlay=TRUE)# , rescaleoverlay=TRUE)  
+#                color=SushiColors(2)(2)[1], overlay=TRUE)# , rescaleoverlay=TRUE)  
+               color=color_annot, overlay=TRUE)# , rescaleoverlay=TRUE)  
   #   axis(side=2,las=2,tcl=.2)
   axis(side=2, las=1, tcl=.2, cex.axis=0.5) 
   #   mtext("Speed (mm/s)\n",side=2,line=1.75,cex=1,font=2)
