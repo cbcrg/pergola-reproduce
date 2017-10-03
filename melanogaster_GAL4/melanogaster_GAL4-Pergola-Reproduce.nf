@@ -139,7 +139,7 @@ process frac_time_behavior {
     set 'results_score_igv', tag_group into results_bed_score_igv
 
     """
-    cov_fraction_time_behavior.py -s ${scores} -m  ${mapping_file} -t ${tag_group}
+    cov_fraction_time_behavior.py -s ${scores} -m ${mapping_file} -t ${tag_group}
     mkdir results_score
     mkdir results_score_igv
     # mv *.bed results_score/
@@ -157,7 +157,7 @@ process frac_time_behavior {
 }
 
 results_bed_score.filter { it[1].split("\\_")[2] == params.output }
-                 .into { results_bed_score; results_bed_score_2; results_bed_score_3; results_bed_score_test }
+                 .into { results_bed_score_sushi; results_bed_score_2; results_bed_score_3; results_bed_score_test }
 
 fraction_time_comb_gr = fraction_time.collectFile()
 
@@ -169,10 +169,11 @@ process comparison_fract_time {
     file ('fraction_time_tbl') from fraction_time_comb_gr
 
     output:
-    file "boxplot_fract_time*.pdf" into boxplot_fractime
+    file "boxplot_fract_time*.${image_format}" into boxplot_fractime
 
     """
-    boxplot_fract_time.R --path2tbl_fr_time=${fraction_time_tbl}
+    boxplot_fract_time.R --path2tbl_fr_time=${fraction_time_tbl} \
+        --image_format=${image_format}
     """
 }
 
@@ -195,11 +196,10 @@ process variables_to_bedGraph {
 /*
 The resulting plot is not used by the moment in the paper, eventually delete
 */
-
 process sushi_plot {
     input:
     set var_bedg_dir, var from results_bedg_var
-    set scores_bed_dir, tag_group from results_bed_score.first()
+    set scores_bed_dir, tag_group from results_bed_score_sushi.first()
 
     output:
     file "sushi_jaaba_scores_annot_${var}.${image_format}" into sushi_plot
@@ -212,12 +212,13 @@ process sushi_plot {
     """
 }
 
-score_files_tag_comp_var = score_files_tag_comp
-    .spread ( variables_list )
+strain_output = "${params.output}"
 
+score_files_tag_comp_var = score_files_tag_comp.filter {
+                                                        it[1].split("\\_")[2] == strain_output
+                                                        }.spread ( variables_list )
 
 process jaaba_scores_vs_variables {
-
   	input:
   	//set file (scores), val (behavior_strain) from score_files_tag_comp
   	set file (scores), val (behavior_strain), val (var) from score_files_tag_comp_var
@@ -240,17 +241,13 @@ process jaaba_scores_vs_variables {
 }
 
 bedGr_to_sushi.into { bedGr_to_sushi; bedGr_to_sushi2 }
-//bedGr_to_sushi2.println()
 
 process sushi_plot_highlight_bg {
     input:
     set file (bedGr_dir), val (var), val (behavior_strain) from bedGr_to_sushi
 
     output:
-    //set "*.pdf", var, behavior_strain into sushi_plot2
-    set "*.${image_format}", var, behavior_strain into sushi_plot2
-    //script:
-    //behavior_strain.println()
+    set "*.${image_format}", var, behavior_strain into sushi_plot2, sushi_plot3
 
     """
     sushi_pergola_BedGraph_highlight.R --path2variables=${bedGr_dir} \
@@ -262,22 +259,18 @@ process sushi_plot_highlight_bg {
 
 process sushi_plot_behavior_annot {
     input:
-    //set scores_bed_dir, tag_group from results_bed_score_2.first()
     set scores_bed_dir, tag_group from results_bed_score_2
 
     output:
-    //file "*.pdf" into sushi_plot_annot
     file "*.${image_format}" into sushi_plot_annot
 
     """
     sushi_pergola_bed.R --path2scores=${scores_bed_dir} \
         --image_format=${image_format}
 
-    # mv sushi_jaaba_annot.pdf "sushi_jaaba_annot_"${tag_group}".pdf"
     mv "sushi_jaaba_annot.${image_format}" "sushi_jaaba_annot_${tag_group}.${image_format}"
     """
 }
-
 
 process gviz_plot_behavior_var {
     input:
@@ -294,7 +287,6 @@ process gviz_plot_behavior_var {
     mv "gviz_jaaba_var.${image_format}" "gviz_jaaba_var_${var_name}.${image_format}"
     """
 }
-
 
 process gviz_plot_behavior_annot {
     input:
@@ -317,7 +309,6 @@ process sign_variable_annotation {
     set file(dir_annot_vs_non_annot), var from annot_vs_non_annot_result
 
     output:
-    //file "${var}.pdf"
     file "${var}.${image_format}"
     stdout into FC_pvalue
 
@@ -342,6 +333,5 @@ process plot_volcano {
     """
     volcano_plot_jaaba.R --path2file=${pvalues_FC}
     """
-
 }
 */

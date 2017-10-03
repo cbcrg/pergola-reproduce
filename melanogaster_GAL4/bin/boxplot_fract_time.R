@@ -41,10 +41,11 @@ if("--help" %in% args) {
 
         Arguments:
         --path2tbl_fr_time=someValue - character, path to read tbl files
-        --help                     - print this text
+        --image_format=image_format  - character
+        --help                       - print this text
 
         Example:
-        ./sushi_plot_jaaba.R --path2tbl_fr_time=\"/foo/tbl.txt\"\n")
+        ./sushi_plot_jaaba.R --path2tbl_fr_time=\"/foo/tbl.txt\" --image_format=\"image_format\"\n")
 
     q (save="no")
 }
@@ -72,6 +73,18 @@ names (argsL) <- argsDF$V1
     }
 }
 
+# plot image format
+{
+    if (is.null (argsL$image_format))
+    {
+        image_format <- "tiff"
+        warning ("[Warning]: format for plots not provided, default tiff")
+    }
+    else
+    {
+        image_format <- argsL$image_format
+    }
+}
 ## Loading libraries
 library (ggplot2)
 
@@ -81,12 +94,27 @@ source("https://gist.githubusercontent.com/JoseEspinosa/307430167b05e408ac071b87
 tbl_frac_time <- read.csv(path2tbl_fr_time, sep="\t", header=F)
 colnames(tbl_frac_time) <- c("fraction", "group")
 
-
 ## colors
 cbb_palette <- c("#D55E00", "#0072B2", "#E69F00", "#000000", "#56B4E9", "#009E73", "#F0E442", "#CC79A7")
 variable <- "boxplot_fract_time"
 behavior <- gsub ("_.*$", "", tbl_frac_time[1,2])
-name_out <- paste (variable, "_", behavior, ".", "pdf", sep="")
+# name_out <- paste (variable, "_", behavior, ".", "pdf", sep="")
+
+{
+    if (image_format == 'tiff' | image_format == 'tif') {
+        name_out <- paste (variable, "_", behavior, ".", "tiff", sep="")
+    }
+    else if (image_format == 'pdf') {   
+        name_out <- paste (variable, "_", behavior, ".", "pdf", sep="")
+    }
+    else if (image_format == 'png') {        
+        name_out <- paste (variable, "_", behavior, ".", "png", sep="")       
+    }
+    else {
+        stop (paste("Unknow image file format:", image_format, sep=" "))
+    }
+}
+
 tbl_frac_time$strain <- gsub("^.*_", "", as.character(tbl_frac_time$group))
 
 ggplot(tbl_frac_time, aes(strain, fraction, fill=strain)) + geom_boxplot(notch=FALSE) +
