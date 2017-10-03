@@ -29,7 +29,15 @@ home <- Sys.getenv("HOME")
 ### Execution example
 ## Rscript melanogaster_gviz_visualization.R --path_bed_files="path_to_bed_files"
 library("ggplot2")
-library("Gviz")
+
+{
+  if("Gviz" %in% rownames(installed.packages(lib.loc="/gviz/time")) == TRUE) {
+    library("Gviz", lib.loc="/gviz/fps")
+  }
+  else {
+    library("Gviz")
+  }
+}
 
 ## bed files to GRanges
 library("GenomicRanges")

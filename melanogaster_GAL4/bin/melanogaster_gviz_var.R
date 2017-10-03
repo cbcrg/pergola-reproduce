@@ -121,7 +121,15 @@ names (argsL) <- argsDF$V1
 ## bedGraph files to GRanges
 library("GenomicRanges")
 library("rtracklayer")
-library("Gviz")
+
+{
+  if("Gviz" %in% rownames(installed.packages(lib.loc="/gviz/time")) == TRUE) {
+    library("Gviz", lib.loc="/gviz/fps")
+  }
+  else {
+    library("Gviz")
+  }
+}
 
 ##############################
 ## bedgraph row measures files

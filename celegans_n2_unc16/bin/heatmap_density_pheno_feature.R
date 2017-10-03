@@ -32,7 +32,15 @@ home <- Sys.getenv("HOME")
 library(ggplot2)
 library("Biostrings")
 library("devtools")
-library("Gviz")
+
+{
+  if("Gviz" %in% rownames(installed.packages(lib.loc="/gviz/fps")) == TRUE) {
+    library("Gviz", lib.loc="/gviz/fps")
+  }
+  else {
+    library("Gviz")
+  }
+}
 
 ## bedfiles to GRanges
 library("GenomicRanges")
