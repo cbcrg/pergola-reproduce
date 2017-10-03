@@ -64,12 +64,15 @@ RUN apt-get update && \
     libhdf5-dev
 
 ## Install R packages
-RUN R -e "install.packages(c('Sushi', 'shiny', 'rmarkdown', 'ggplot2', 'XML', 'Rcurl','cowplot', 'dplyr', 'survival', 'gridExtra', 'utils', 'gutils', 'gtools', 'ggrepel', 'extrafont', 'devtools'), repos='http://cran.rstudio.com/')" \
+RUN R -e "install.packages(c('Sushi', 'shiny', 'rmarkdown', 'ggplot2', 'XML', 'Rcurl','cowplot', 'dplyr', 'survival', 'gridExtra', 'utils', 'gutils', 'gtools', 'ggrepel', 'extrafont', 'devtools', 'withr'), repos='http://cran.rstudio.com/')" \
 && Rscript -e 'source("http://bioconductor.org/biocLite.R"); biocLite("GenomicRanges"); biocLite("rtracklayer"); biocLite("Sushi");'
 
-# version of Gviz modified to show time instead of genomics units
-RUN R -e  'devtools::install_github("JoseEspinosa/Gviz")'
+# Two versions of gviz, display time axis as fps or time units
+RUN bash -c 'mkdir -p /gviz/fps; mkdir -p /gviz/time'
+
+# version of Gviz modified to show time units instead of genomics units
+RUN R -e  'withr::with_libpaths(new = "/gviz/time", devtools::install_github("JoseEspinosa/Gviz"))'
 
 ## version of Gviz modified to show fps instead of genomics units
-# RUN R -e  'devtools::install_github("JoseEspinosa/Gviz", ref = "fps")'
+RUN R -e  'withr::with_libpaths(new = "/gviz/fps", devtools::install_github("JoseEspinosa/Gviz", ref = "fps"))'
 
