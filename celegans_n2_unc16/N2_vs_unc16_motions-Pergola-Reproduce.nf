@@ -218,8 +218,6 @@ process get_motion {
   	"""
 }
 
-
-//bed_cov
 /*
 process motion_to_pergola {
 
@@ -240,7 +238,6 @@ process motion_to_pergola {
 }
 */
 
-
 /*
  * From one mat file 3 motion (forward, paused, backward) files are obtained
  * A channel is made with matfile1 -> forward
@@ -259,7 +256,7 @@ motion_files_flat_p = motion_files.map { name_mat, motion_f ->
 motion_files_flat_p.into { motion_files_flat; motion_files_flat_wr }
 
 process motion_to_pergola { 
-      	
+
   	input:
   	set file ('motion_file'), val (name_file), val (name_file_motion), val (motion) from motion_files_flat
     file worms_motion_map from map_motion
@@ -288,19 +285,23 @@ bed_loc_motion = bed_loc_no_track_line
  * Using bedtools intersect motion with phenotypic feature bed files
  */
 process intersect_loc_motion {
-	
+
 	  input:
 	  set val (mat_file_loc), val (pheno_feature), file ('bed_loc_no_tr'), val (exp_group), val (mat_motion_file), file (motion_file), val (name_file_motion), val (direction) from bed_loc_motion
 	  file bed2pergola from map_bed_loc.first()
 	
 	  output:
 	  set '*.mean.bed', pheno_feature, mat_file_loc, mat_motion_file, name_file_motion, exp_group into bed_mean_speed_motion	
-	  set '*.mean.bedGraph', pheno_feature, mat_file_loc, mat_motion_file, name_file_motion, exp_group into bedGr_mean_loc_motion
+	  //set '*.mean.bedGraph', pheno_feature, mat_file_loc, mat_motion_file, name_file_motion, exp_group into bedGr_mean_loc_motion
 	  set '*.intersect.bed', pheno_feature, mat_file_loc, mat_motion_file, name_file_motion, exp_group into bed_intersect_loc_motion, bed_intersect_loc_motion2p, bed_intersect_l_m
-	  set '*.mean_file.bed', pheno_feature, mat_file_loc, mat_motion_file, name_file_motion, exp_group into mean_intersect_loc_motion
+	  //set '*.mean_file.bed', pheno_feature, mat_file_loc, mat_motion_file, name_file_motion, exp_group into mean_intersect_loc_motion
 
 	  """
-	  celegans_feature_i_motion.py -p $bed_loc_no_tr -m $motion_file -b $bed2pergola
+	  intersectBed -a $bed_loc_no_tr -b $motion_file  > mean_speed_i_motionDir.intersect.bed
+
+      awk '{ sum += \$5; n++ } END { if (n > 0) print sum / n; }' mean_speed_i_motionDir.intersect.bed > mean_speed_i_motionDir.mean.bed
+
+	  # celegans_feature_i_motion.py -p $bed_loc_no_tr -m $motion_file -b $bed2pergola
 	  """
 }
 
@@ -322,7 +323,7 @@ process inters_to_bedGr {
 		  pergola_rules.py -i $file_bed_inters -m $bed2pergola -nh -s chrm start end nature value strain start_rep end_rep color -f bedGraph -w 1
 	  else
 		  touch tr_chr1_d.bedGraph
-    fi 	
+      fi
 	  """
 }
 
@@ -664,6 +665,41 @@ bedGraph_intersect_loc_motion.subscribe {
 }
 
 bed_motion_wr.subscribe {
-  bed_direction = it[1]
-  bed_direction.copyTo ( result_dir_bed.resolve ( it[0] + "_" + it[2] + "_direction" + ".bed" ))
+    bed_direction = it[1]
+    bed_direction.copyTo ( result_dir_bed.resolve ( it[0] + "_" + it[2] + "_direction" + ".bed" ))
 }
+
+/*
+result_dir_csv = file("results_csv$tag_res")
+
+locomotion_files_wr.subscribe {
+    file_speed = it[0]
+    file_speed.copyTo ( result_dir_csv.resolve ( it[1] + ".csv" ) )
+}
+*/
+
+/*
+
+i=1
+for f in *N2*.csv
+do
+     echo -e "id\tframe_start\tframe_end\thead\theadTip\tmidbody\ttail\ttailTip\tforaging_speed\ttail_motion\tcrawling" > "N2_$i.csv"
+     cat $f | grep -v "#"  | sed 's/-10000/0/g' | awk -v i="$i" 'NR>1 {print "N2_"i"\t"$0}' >> "N2_$i.csv"
+     echo $i
+     i=$[$(echo $i) + 1]
+done
+
+i=1
+for f in *unc*.csv
+do
+     echo -e "id\tframe_start\tframe_end\thead\theadTip\tmidbody\ttail\ttailTip\tforaging_speed\ttail_motion\tcrawling" > "unc16_$i.csv"
+     cat $f | grep -v "#" | sed 's/-10000/0/g' | awk -v i="$i" 'NR>1 {print "unc16_"i"\t"$0}' >> "unc16_$i.csv"
+     echo $i
+     i=$[$(echo $i) + 1]
+done
+
+pergola -i ./*.csv -m ./worm_speed2pergola.txt -f bedGraph -w 1 -min 0 -max 29000
+
+awk '{ sum += $5; n++ } END { if (n > 0) print sum / n; }' mean_speed_i_motionDir.intersect.bed
+
+*/
