@@ -149,7 +149,6 @@ process frac_time_behavior {
         cat \${f} | sed 's/chase/\"\"/g' > \${f}.tmp
         cp \${f}.tmp results_score/\${f}
         mv \${f}.tmp results_score_igv/"`echo \${f} | sed s/L4//g | sed s/[a-z]*// | sed s/_//g | sed s/.bed//g | sed s/[a-zA-Z]//g`".bed
-
     done
 
     # cp *.bed results_score/

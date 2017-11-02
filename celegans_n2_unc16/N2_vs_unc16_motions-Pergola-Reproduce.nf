@@ -176,8 +176,8 @@ process feature_to_pergola {
   	
   	"""  	
   	cat $worms_speed2p | sed 's/behavioral_file:$body_part > pergola:dummy/behavioral_file:$body_part > pergola:data_value/g' > mod_map_file
-  	pergola_rules.py -i $speed_file -m mod_map_file
-  	pergola_rules.py -i $speed_file -m mod_map_file -f bedGraph -w 1 -min 0 -max 29000
+  	pergola -i $speed_file -m mod_map_file
+  	pergola -i $speed_file -m mod_map_file -f bedGraph -w 1 -min 0 -max 29000
   	
   	# This is done just because is easy to see in the display of the genome browsers
   	cat tr*.bed | sed 's/track name=\"1_a\"/track name=\"${body_part}\"/g' > bed_file.tmp
@@ -230,7 +230,7 @@ process motion_to_pergola {
   	set name_file, 'tr*.bed', name_file_motion into bed_motion, bed_motion_wr
 
   	"""
-  	pergola_rules.py -i $motion_file -m $worms_motion_map
+  	pergola -i $motion_file -m $worms_motion_map
   	cat tr_1_dt_${motion}.bed | sed 's/track name=\"1_a\"/track name=\"${motion}\"/g' > tr_1_dt_${motion}.bed.tmp
   	cat tr_1_dt_${motion}.bed.tmp | grep -v 'track name' > tr_1_dt_${motion}.bed
   	rm tr_1_dt_${motion}.bed.tmp
@@ -265,7 +265,7 @@ process motion_to_pergola {
   	set name_file, 'tr*.bed', name_file_motion into bed_motion, bed_motion_wr
   	  	
   	"""
-  	pergola_rules.py -i $motion_file -m $worms_motion_map
+  	pergola -i $motion_file -m $worms_motion_map
   	cat tr_1_dt_${motion}.bed | sed 's/track name=\"1_a\"/track name=\"${motion}\"/g' > tr_1_dt_${motion}.bed.tmp
   	cat tr_1_dt_${motion}.bed.tmp | grep -v 'track name' > tr_1_dt_${motion}.bed
   	rm tr_1_dt_${motion}.bed.tmp  	
@@ -320,7 +320,7 @@ process inters_to_bedGr {
 	  """		
 	  if [ -s $file_bed_inters ]
 	  then		
-		  pergola_rules.py -i $file_bed_inters -m $bed2pergola -nh -s chrm start end nature value strain start_rep end_rep color -f bedGraph -w 1
+		  pergola -i $file_bed_inters -m $bed2pergola -nh -s chrm start end nature value strain start_rep end_rep color -f bedGraph -w 1
 	  else
 		  touch tr_chr1_d.bedGraph
       fi
