@@ -119,15 +119,20 @@ data_bedgraph_variable <- lapply(bedg_files, function (bedg) {
 
 chrom            = "chr1"
 chromstart       = 0
-chromend         = 29002
+# chromend         = 29002
+# chromend         = 29002 #longest record
+chromend         = 23000 #almost all records reach this point
+height_tr <- length(data_bedgraph_variable) * 0.5
 
 {
     if (image_format == 'tiff' | image_format == 'tif') {
-        tiff(paste("sushi_var", ".", image_format, sep="") , height=10, width=20, units="cm", res=300)
+        # tiff(paste("sushi_var", ".", image_format, sep="") , height=10, width=20, units="cm", res=300)
+        tiff(paste("sushi_var", ".", image_format, sep="") , height=height_tr, width=30, units="cm", res=300)
         size_lab <- 0.3
     }
     else if (image_format == 'pdf') {        
-        pdf(paste("sushi_var", ".", image_format, sep="") , height=10, width=20)
+        # pdf(paste("sushi_var", ".", image_format, sep="") , height=10, width=20)
+        pdf(paste("sushi_var", ".", image_format, sep="") , height=height_tr, width=30)
         size_lab <- 0.5
     }
     else if (image_format == 'png') {        
