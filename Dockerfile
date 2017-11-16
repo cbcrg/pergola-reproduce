@@ -29,6 +29,8 @@ RUN apt-get update && \
     apt-get install --fix-missing -y \
     sudo \
     python \
+    python-dev \
+    python-distribute \
     python-pip \
     bedtools
 
@@ -57,10 +59,7 @@ RUN apt-get update && \
     libxt-dev \
     libssl-dev \
     libxml2-dev \
-    python-dev \
-    python-distribute \
     gfortran \
-    bedtools \
     libhdf5-dev
 
 ## Install R packages
