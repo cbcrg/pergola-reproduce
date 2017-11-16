@@ -45,7 +45,8 @@ scores_chase_int = intervals.IntData(tmp_track.name, map_dict=mappings_jaaba.cor
 data_type_col = {'chase': 'blue'}
 
 if tag_group == "chase_ctrl_pBDPGAL4":
-    data_type_col = {'chase': 'orange'}
+#    data_type_col = {'chase': 'orange'}
+    data_type_col = {'chase': 'red'}
 
 dict_bed_annotated_int = scores_chase_int.convert(mode="bed", color_restrictions=data_type_col)
 
