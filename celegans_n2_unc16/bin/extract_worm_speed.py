@@ -43,7 +43,6 @@ parser.add_argument('-i','--input', help='Worms data hdf5 format matlab file', r
 
 args = parser.parse_args()
 
-print ("Input file: %s" % args.input)
 print >> stderr, "Input file: %s" % args.input
 
 # Input files
