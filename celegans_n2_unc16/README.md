@@ -2,15 +2,6 @@
 
 This repository contains the software, scripts and data to reproduce the results corresponding to the *C.elegans* data of the Pergola paper.
 
-If you have not install yet [docker](https://www.docker.com/) and [nextflow](https://www.nextflow.io/), follow this [intructions](../README.md)
-
-## Pull docker image
-Pull the Docker image use for processing data with Pergola (Pergola and its dependencies installed)
-
-```bash
-docker pull pergola/pergola@sha256:8a52116be9bd371ae9bed9c0b36a8fc14634a7e14bbc764cc93905d8566e0939
-```
-
 ## Clone the repository
 
 ```bash
@@ -25,10 +16,11 @@ Data can be downloaded and uncompressed using the following command:
 
 ```bash
 mkdir data
+TODO modify
 wget -O- https://zenodo.org/record/582343/files/celegans_unc16_N2.tar.gz | tar xz -C data
 ```
 
-### Original Data Sources
+#### Original Data Sources
 If you prefer, you can download the data from the original sources:
 * N2 *C.elegans* strain (control) behavioral recordings: [N2](http://wormbehavior.mrc-lmb.cam.ac.uk/strain.php?strain=300)
 * unc-16 *C.elegans* strain behavioral recordings: [unc-16](http://wormbehavior.mrc-lmb.cam.ac.uk/strain.php?strain=1)
@@ -78,6 +70,15 @@ N2 on food_2009_12_09__10_32_45___7___1_features.mat
 N2 on food_2009_12_09__10_33_20__1_features.mat
 ```
 
+If you have not install yet [docker](https://www.docker.com/) and [nextflow](https://www.nextflow.io/), follow this [intructions](../README.md)
+
+## Pull docker image
+Pull the Docker image use for processing data with Pergola (Pergola and its dependencies installed)
+
+```bash
+docker pull pergola/pergola@sha256:8a52116be9bd371ae9bed9c0b36a8fc14634a7e14bbc764cc93905d8566e0939
+```
+
 ## Run nextflow pipeline
 Once data is downloaded, it is possible to reproduce all the paper results using this command:
 
@@ -86,16 +87,16 @@ NXF_VER=0.24.3 nextflow run N2_vs_unc16_motions-Pergola-Reproduce.nf \
     --strain1_trackings 'data/unc_16/*.mat' \
     --strain2_trackings 'data/N2/*.mat' \
     --mappings_speed 'data/mappings/worms_speed2p.txt' \
-	--mappings_bed 'data/mappings/bed2pergola.txt' \
-	--mappings_motion data/mappings/worms_motion2p.txt \ 
-	-with-docker
+	  --mappings_bed 'data/mappings/bed2pergola.txt' \
+	  --mappings_motion data/mappings/worms_motion2p.txt \ 
+	  -with-docker
 ```	
 
 ## Visualization
 You can use the version we adapted of the [Integrative Genomics Viewer](http://software.broadinstitute.org/software/igv/) (or the original one) to browse the resulting data (as we did for the paper).
 However IGV does not allow extended programatic access to set the graphical options, hence our script produces a heatmap reproducing the paper figure. This file can be found inside the ``heatmap`` results folder.
 
-### Adapted IGV version
+#### Adapted IGV version
 We adapted IGV to display temporal data incorporating minor changes. To do so we fork the [IGV](https://github.com/igvteam/igv) git repository into but we call IBB (Integrative Behavioral Browser)
 
 You can clone and build IBB using the following commands:
@@ -125,7 +126,7 @@ Finally click on the same menu the **Set Heatmap Scale** option and select the c
 
 <img src="/celegans_n2_unc16/images/heatmap_options.png" alt="snapshot create-genome" style="width: 100%;"/>
 
-### Heatmap
+#### Heatmap
 We produce a heatmap reproducing the paper figure using the [Gviz](https://bioconductor.org/packages/release/bioc/html/Gviz.html) R package.
 
 ## Density plots

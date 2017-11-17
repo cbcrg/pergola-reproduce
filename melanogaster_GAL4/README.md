@@ -4,16 +4,7 @@ This repository contains the software, scripts and data to reproduce the results
 
 If you have not install yet [docker](https://www.docker.com/) and [nextflow](https://www.nextflow.io/), follow this [intructions](../README.md)
 
-## Data processing
-
-### Pull docker image
-Pull the Docker image use for processing data with Pergola (Pergola and its dependencies installed)
-
-```bash
-docker pull pergola/pergola@sha256:8a52116be9bd371ae9bed9c0b36a8fc14634a7e14bbc764cc93905d8566e0939
-```
-
-### Clone the repository
+## Clone the repository
 
 ```bash
 git clone --recursive https://github.com/JoseEspinosa/pergola-paper-reproduce.git
@@ -22,7 +13,7 @@ cd pergola-paper-reproduce/melanogaster_GAL4
 
 **Note**: If you have previously download the repository, then you only need to go to the ``melanogaster_GAL4`` folder.
 
-### Data
+## Data
 
 Data is publicly available in [Zenodo](https://zenodo.org/) as a compressed tarball.
 
@@ -33,10 +24,17 @@ mkdir data
 wget -O- https://zenodo.org/record/582475/files/melanogaster_GAL4.tar.gz | tar xz -C data
 ```
 
-### Original Data Sources
+#### Original Data Sources
 The original data can be downloaded from the following [source](http://sourceforge.net/projects/jaaba/files/Sample%20Data/sampledata_v0.5.zip/download).
 
-### Run nextflow pipeline
+## Pull docker image
+Pull the Docker image use for processing data with Pergola (Pergola and its dependencies installed)
+
+```bash
+docker pull pergola/pergola@sha256:8a52116be9bd371ae9bed9c0b36a8fc14634a7e14bbc764cc93905d8566e0939
+```
+
+## Run nextflow pipeline
 Once data is downloaded, it is possible to reproduce all the results using this command:
 
 ```bash
@@ -47,7 +45,6 @@ NXF_VER=0.24.3 nextflow run melanogaster_GAL4-Pergola-Reproduce.nf \
     --mappings='data/jaaba2pergola.txt' \
     -with-docker
 ```
-
 
 ## Sushi visualization
 
