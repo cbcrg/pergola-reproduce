@@ -50,7 +50,7 @@ nextflow run melanogaster_GAL4-Pergola-Reproduce.nf \
   --scores='small_data/scores/scores_chase_*.mat' \
   --var_dir='small_data/perframe_pBDPGAL4/' \
   --variables="dnose2ell dtheta velmag" \
-  --mappings='small_data/jaaba2pergola.txt' \
+  --mappings='small_data/mappings/jaaba2pergola.txt' \
   --output='pBDPGAL4' \
   -with-docker
 // --var_dir_test='small_data/perframe_*' \
@@ -80,7 +80,7 @@ nextflow run melanogaster_GAL4-Pergola-Reproduce.nf \
 mapping_file = file(params.mappings)
 
 if( !mapping_file.exists() ) exit 1, "Missing mapping file: ${mapping_file}"
-if( !file(params.var_dir).exists() ) exit 1, "Missing variable directory: ${params.var_dir}"
+//if( !file(params.var_dir).exists() ) exit 1, "Missing variable directory: ${params.var_dir}"
 
 /*
  * Create a channel for scores
@@ -102,9 +102,17 @@ score_files_tag.into { score_files_tag_bed; score_files_tag_comp; score_files_pr
 /*
  * Create a channel for directory containing variables
  */
-variable_dir = Channel.fromPath( params.var_dir )
+variable_dir = Channel.fromPath( params.var_dir, type: 'dir' )
 
-variable_dir.into { variable_dir_bg; variable_dir_scores }
+variable_dir_tag = variable_dir.map {
+  def content = it
+  def name = it.name.split("\\_")[-1]
+  [ content, name ]
+}
+
+
+variable_dir_tag.into { variable_dir_bg; variable_dir_scores; var_test }
+var_test.println()
 
 /*
  * List of variable to extract from the folder. If set to "all", all variables are extracted.
@@ -135,28 +143,27 @@ process frac_time_behavior {
     stdout into fraction_time
     //file 'tr*.bed' into bed_score_cov
     //file 'chrom.sizes' into chrom_sizes
-    set 'results_score', tag_group into results_bed_score
-    set 'results_score_igv', tag_group into results_bed_score_igv
+    //set 'results_score', tag_group into results_bed_score
+    //set 'results_score_igv*', tag_group into results_bed_score_igv
+    set "results_score_${tag_group}", tag_group into results_bed_score
+    set "results_score_igv_${tag_group}", tag_group into results_bed_score_igv
 
     """
     cov_fraction_time_behavior.py -s ${scores} -m ${mapping_file} -t ${tag_group}
-    mkdir results_score
-    mkdir results_score_igv
-    # mv *.bed results_score/
+    mkdir results_score_${tag_group}
+    mkdir results_score_igv_${tag_group}
+    # mv *.bed results_score_${tag_group}/
 
     for f in *.bed
     do
         cat \${f} | sed 's/chase/\"\"/g' > \${f}.tmp
-        cp \${f}.tmp results_score/\${f}
-        mv \${f}.tmp results_score_igv/"`echo \${f} | sed s/L4//g | sed s/[a-z]*// | sed s/_//g | sed s/.bed//g | sed s/[a-zA-Z]//g`".bed
+        cp \${f}.tmp results_score_${tag_group}/\${f}
+        mv \${f}.tmp results_score_igv_${tag_group}/"`echo \${f} | sed s/L4//g | sed s/[a-z]*// | sed s/_//g | sed s/.bed//g | sed s/[a-zA-Z]//g`".bed
     done
 
-    # cp *.bed results_score/
+    # cp *.bed results_score_${tag_group}/
     """
 }
-
-results_bed_score.filter { it[1].split("\\_")[2] == params.output }
-                 .into { results_bed_score_sushi; results_bed_score_2; results_bed_score_3; results_bed_score_test }
 
 fraction_time_comb_gr = fraction_time.collectFile()
 
@@ -178,12 +185,13 @@ process comparison_fract_time {
 
 process variables_to_bedGraph {
     input:
-    file ('variable_d') from variable_dir_bg.first()
+    //file ('variable_d') from variable_dir_bg.first()
+    set file ('variable_d'), val (tag_group) from variable_dir_bg
     each var from variables_list
     file mapping_file
 
     output:
-    set 'results_var', var into results_bedg_var, bedGr_to_gviz
+    set 'results_var', var, tag_group into results_bedg_var, bedGr_to_gviz
 
     """
     jaaba_to_pergola fp -i ${variable_d} -jf ${var} -m ${mapping_file} -f bedGraph -nt
@@ -192,22 +200,33 @@ process variables_to_bedGraph {
     """
 }
 
+results_bed_score //.filter { it[1].split("\\_")[2] == params.output }
+                 .into { results_bed_score_sushi; results_bed_score_2; results_bed_score_3; results_bed_score_test }
+
+score_variables_vs_scores = results_bedg_var
+    .spread (results_bed_score_test)
+    .filter { it[2] == it[4] }
+
+
 /*
 The resulting plot is not used by the moment in the paper, eventually delete
 */
 process sushi_plot {
     input:
-    set var_bedg_dir, var from results_bedg_var
-    set scores_bed_dir, tag_group from results_bed_score_sushi.first()
+    set var_bedg_dir, var, tag_group, scores_bed_dir, tag_group_score from score_variables_vs_scores
+
+    //set var_bedg_dir, var, tag_group_var from results_bedg_var
+    //set scores_bed_dir, tag_group from results_bed_score_sushi.first()
 
     output:
-    file "sushi_jaaba_scores_annot_${var}.${image_format}" into sushi_plot
+    file "*.${image_format}" into sushi_plot
 
     """
     sushi_pergola_bedAndBedGraph.R --path2variables=${var_bedg_dir} \
          --path2scores=${scores_bed_dir} \
          --variable_name=${var} \
          --image_format=${image_format}
+    mv "sushi_jaaba_scores_annot_${var}.${image_format}" "sushi_jaaba_scores_annot_${var}_${tag_group_var}.${image_format}"
     """
 }
 
@@ -273,17 +292,18 @@ process sushi_plot_behavior_annot {
 
 process gviz_plot_behavior_var {
     input:
-    set var_bedg_dir, var_name from bedGr_to_gviz
+    set var_bedg_dir, var_name, tag_group from bedGr_to_gviz
 
     output:
     file "*.${image_format}" into gviz_plot_annot
 
     """
     melanogaster_gviz_var.R  --path2variables=${var_bedg_dir} \
+        --behavior_strain=${tag_group} \
         --variable_name=${var_name} \
         --image_format=${image_format}
 
-    mv "gviz_jaaba_var.${image_format}" "gviz_jaaba_var_${var_name}.${image_format}"
+    mv "gviz_jaaba_var.${image_format}" "gviz_jaaba_var_${var_name}_${tag_group}.${image_format}"
     """
 }
 

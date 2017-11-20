@@ -54,7 +54,7 @@ nextflow run N2_vs_unc16_motions-Pergola-Reproduce.nf --strain1_trackings 'small
 	--mappings_speed 'small_data/mappings/worms_speed2p.txt' \
 	--mappings_bed 'small_data/mappings/bed2pergola.txt' \
 	--mappings_motion small_data/mappings/worms_motion2p.txt \
-	-with-docker -resume
+	-with-docker
 */
 
 /*

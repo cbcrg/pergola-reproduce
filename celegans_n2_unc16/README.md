@@ -76,7 +76,7 @@ If you have not install yet [docker](https://www.docker.com/) and [nextflow](htt
 Pull the Docker image use for processing data with Pergola (Pergola and its dependencies installed)
 
 ```bash
-docker pull pergola/pergola@sha256:8a52116be9bd371ae9bed9c0b36a8fc14634a7e14bbc764cc93905d8566e0939
+docker pull pergola/pergola@sha256:f7208e45e761dc0cfd3e3915237eb1a96eead6dfa9c8f3a5b2414de9b8df3a3d
 ```
 
 ## Run nextflow pipeline
