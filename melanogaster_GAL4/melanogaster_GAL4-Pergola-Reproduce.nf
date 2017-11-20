@@ -47,13 +47,14 @@ log.info "\n"
 // Example command to run the script with the toy data provided in the repository
 /*
 nextflow run melanogaster_GAL4-Pergola-Reproduce.nf \
-  --scores='small_data/scores/scores_chase_*.mat' \
-  --var_dir='small_data/perframe_pBDPGAL4/' \
-  --variables="dnose2ell dtheta velmag" \
+  --scores='small_data/scores/scores_chase_*.mat'
+  --var_dir='small_data/perframe_*' \
+//  --variables="dnose2ell dtheta velmag"
+  --variables="velmag"
   --mappings='small_data/mappings/jaaba2pergola.txt' \
-  --output='pBDPGAL4' \
+  --output='results' \
+  --image_format='png' \
   -with-docker
-// --var_dir_test='small_data/perframe_*' \
 
 // by strain
 nextflow run melanogaster_GAL4-Pergola-Reproduce.nf \
