@@ -1,4 +1,4 @@
-# N2_vs_unc16_motions-Pergola-Reproduce.nf
+# celegans-Pergola-Reproduce.nf
 
 This repository contains the software, scripts and data to reproduce the results corresponding to the *C.elegans* data of the Pergola paper.
 
@@ -16,8 +16,7 @@ Data can be downloaded and uncompressed using the following command:
 
 ```bash
 mkdir data
-TODO modify
-wget -O- https://zenodo.org/record/582343/files/celegans_unc16_N2.tar.gz | tar xz -C data
+wget -O- https://zenodo.org/record/582343/files/celegans_dataset.tar.gz | tar xz -C data
 ```
 
 #### Original Data Sources
@@ -83,13 +82,13 @@ docker pull pergola/pergola@sha256:f7208e45e761dc0cfd3e3915237eb1a96eead6dfa9c8f
 Once data is downloaded, it is possible to reproduce all the paper results using this command:
 
 ```bash
-NXF_VER=0.24.3 nextflow run celegans-Pergola-Reproduce.nf \ 
+NXF_VER=0.24.3 nextflow run celegans-Pergola-Reproduce.nf \
     --strain1_trackings 'data/unc_16/*.mat' \
     --strain2_trackings 'data/N2/*.mat' \
     --mappings_speed 'data/mappings/worms_speed2p.txt' \
-	  --mappings_bed 'data/mappings/bed2pergola.txt' \
-	  --mappings_motion data/mappings/worms_motion2p.txt \ 
-	  -with-docker
+    --mappings_bed 'data/mappings/bed2pergola.txt' \
+    --mappings_motion data/mappings/worms_motion2p.txt \
+    -with-docker
 ```	
 
 ## Visualization

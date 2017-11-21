@@ -516,7 +516,7 @@ process plot_distro {
     set "*out.${image_format}", strain, pheno_feature, direction into plots_pheno_feature_str1_str2
 
   	"""
-  	plot_pheno_feature_distro_paper_version.R --bed_file_str1=${intersect_feature_motion_str1} \
+  	plot_speed_i_motion_distro.R --bed_file_str1=${intersect_feature_motion_str1} \
   	    --bed_file_str2=${intersect_feature_motion_strain2} \
   	    --direction=${direction} \
   	    --image_format=${image_format}
