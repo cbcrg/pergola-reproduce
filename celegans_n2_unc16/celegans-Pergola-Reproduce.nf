@@ -50,7 +50,7 @@ log.info "image format                : ${params.image_format}"
 log.info "\n"
 
 /*
-nextflow run N2_vs_unc16_motions-Pergola-Reproduce.nf --strain1_trackings 'small_data/unc_16/*.mat' --strain2_trackings 'small_data/N2/*.mat' \
+nextflow run celegans-Pergola-Reproduce.nf --strain1_trackings 'small_data/unc_16/*.mat' --strain2_trackings 'small_data/N2/*.mat' \
 	--mappings_speed 'small_data/mappings/worms_speed2p.txt' \
 	--mappings_bed 'small_data/mappings/bed2pergola.txt' \
 	--mappings_motion small_data/mappings/worms_motion2p.txt \
@@ -82,9 +82,9 @@ Channel
  * Create a channel for strain 2 worm trackings 
  */
 Channel
-	 .fromPath( params.strain2_trackings )
+	.fromPath( params.strain2_trackings )
     .ifEmpty { error "Cannot find any mat file with strain 2 data" }
-	 .set { strain2_files }
+	.set { strain2_files }
 
 /*
  * Create a channel for pergola mappings for bed files
@@ -219,26 +219,6 @@ process get_motion {
 }
 
 /*
-process motion_to_pergola {
-
-  	input:
-  	set file (bed_file), val (body_part), val (name_file) from bed_cov
-    falta chrom sizes
-    file worms_motion_map from map_motion
-
-  	output:
-  	set name_file, 'tr*.bed', name_file_motion into bed_motion, bed_motion_wr
-
-  	"""
-  	pergola -i $motion_file -m $worms_motion_map
-  	cat tr_1_dt_${motion}.bed | sed 's/track name=\"1_a\"/track name=\"${motion}\"/g' > tr_1_dt_${motion}.bed.tmp
-  	cat tr_1_dt_${motion}.bed.tmp | grep -v 'track name' > tr_1_dt_${motion}.bed
-  	rm tr_1_dt_${motion}.bed.tmp
-  	"""
-}
-*/
-
-/*
  * From one mat file 3 motion (forward, paused, backward) files are obtained
  * A channel is made with matfile1 -> forward
  *                        matfile1 -> backward
@@ -272,7 +252,7 @@ process motion_to_pergola {
   	"""
 } 
 
-map_bed.into { map_bed_loc; map_bed_bG; map_bed_turn} //del remove turn
+map_bed.into { map_bed_loc; map_bed_bG}
 
 /*
  * Filter is used to delete pairs that do not come from the same original mat file
@@ -300,13 +280,11 @@ process intersect_loc_motion {
 	  intersectBed -a $bed_loc_no_tr -b $motion_file  > mean_speed_i_motionDir.intersect.bed
 
       awk '{ sum += \$5; n++ } END { if (n > 0) print sum / n; }' mean_speed_i_motionDir.intersect.bed > mean_speed_i_motionDir.mean.bed
-
-	  # celegans_feature_i_motion.py -p $bed_loc_no_tr -m $motion_file -b $bed2pergola
 	  """
 }
 
 /*
- * Intersected bed files transformed to bedgraph format for heatmaps visualizations
+ * Intersected bed files transformed to bedgraph format for heatmap visualizations
  */
 process inters_to_bedGr {
 	
@@ -347,6 +325,9 @@ bed_intersect_loc_motion_plot = bed_intersect_loc_motion2p.collectFile(newLine: 
  * Tagging files for plotting
  */
 process tag_bed_mean_files {
+
+    publishDir = [path: "results${tag_res}/inters_files_to_distro", mode: 'copy']
+
   	input: 
   	set file ('bed_file'), val (strain), val (pheno_feature), val (direction), val (strain_beh_dir), val (exp_group) from bed_intersect_loc_motion_plot
   	
@@ -408,6 +389,8 @@ str2_bedGraph_heatmap = bedGraph_heatmap_str2
  */
 process heat_and_density_plot {
 
+    publishDir = [path: "results${tag_res}/igv", mode: 'copy', pattern: "*_igv"]
+
   	input:  	
   	file (str1_f) from str1_bed_for
     file (str1_b) from str1_bed_back
@@ -421,7 +404,7 @@ process heat_and_density_plot {
     file (str2_bedGraph_heatmap_list) from str2_bedGraph_heatmap.toSortedList()
     
   	output:
-    file "heatmap_str1_str2.${image_format}" into heatmap
+    file "gviz_heatmap_str1_str2.${image_format}" into heatmap_gviz
     file ('results_bedgr1') into results_bedgr1
     file ('results_bedgr2') into results_bedgr2
     file ('results_bedgr1_igv') into results_bedgr1_igv
@@ -466,6 +449,8 @@ process heat_and_density_plot {
   		   --file_p_str1=${str1_p} --file_p_str2=${str2_p} \
   		   --image_format=${image_format}
 
+    mv "heatmap_str1_str2.${image_format}"  "gviz_heatmap_str1_str2.${image_format}"
+
   	mv \$path_str1 results_bedgr1/
   	mv \$path_str2 results_bedgr2/
 
@@ -480,6 +465,9 @@ results_bedgr_2 = results_bedgr2.map { [ it, 'N2' ] }
 results_bedgr_sushi = results_bedgr_1.concat (results_bedgr_2)
 
 process heatmap_sushi {
+
+    publishDir = [path: "results${tag_res}/sushi", mode: 'copy']
+
     input:
     set var_bedg_dir, tag_group from results_bedgr_sushi
 
@@ -492,47 +480,17 @@ process heatmap_sushi {
     """
 }
 
-result_dir_heatmap = file("$baseDir/heatmap$tag_res")
- 
-result_dir_heatmap.with {
+result_dir_heatmap_gviz = file("$baseDir/results${tag_res}/gviz")
+
+result_dir_heatmap_gviz.with {
     if( !empty() ) { deleteDir() }
     mkdirs()
-    println "Created: $result_dir_heatmap"
+    println "Created: $result_dir_heatmap_gviz"
 }
 
-heatmap.subscribe {	
-	  it.copyTo( result_dir_heatmap.resolve ( it.name ) )   
+heatmap_gviz.subscribe {
+	  it.copyTo( result_dir_heatmap_gviz.resolve ( it.name ) )
 }
-
-/*
-result_dir_bedg_str1 = file("$baseDir/results$tag_str1")
-result_dir_bedg_str2 = file("$baseDir/results$tag_str2")
-
-result_dir_bedg_str1.with {
-    if( !empty() ) { deleteDir() }
-    mkdirs()
-    println "Created: $result_dir_bedg_str1"
-}
-
-str1_bedg_tagged.subscribe {   
-    bedGraph_file = it[0]
-    bedGraph_file.copyTo (result_dir_bedg_str1.resolve ( it[1] + "." + it[2] + ".bedGraph" ) )
-}
-
-result_dir_bedg_str2.with {
-    if( !empty() ) { deleteDir() }
-    mkdirs()
-    println "Created: $result_dir_bedg_str2"
-}
-
-str2_bedg_tagged.subscribe {   
-    bedGraph_file = it[0]
-    bedGraph_file.copyTo (result_dir_bedg_str2.resolve ( it[1] + "." + it[2] + ".bedGraph" ) )
-}
-
-dir_bedg_str1 = file("$baseDir/results$tag_str1")
-dir_bedg_str2 = file("$baseDir/results$tag_str2")
-*/
 
 /*
  * Matching the control group for each strain in the data set
@@ -548,158 +506,33 @@ str1_str2_bed_tag = str1_bed_tagged
  */
 process plot_distro {
 
+    publishDir = [path: "results${tag_res}/distribution_plots", mode: 'copy']
+
   	input:
   	set file (intersect_feature_motion_str1), strain, pheno_feature, direction, file (intersect_feature_motion_strain2) from str1_str2_bed_tag
   
   	output:
-  	// R creates a Rplots.pdf that is way we have to specify the tag "out" 
-  	//set '*.png', strain, pheno_feature, direction into plots_pheno_feature_str1_str2
+  	// R creates a Rplots.pdf that is why we have to specify the tag "out"
     set "*out.${image_format}", strain, pheno_feature, direction into plots_pheno_feature_str1_str2
 
   	"""
   	plot_pheno_feature_distro_paper_version.R --bed_file_str1=${intersect_feature_motion_str1} \
   	    --bed_file_str2=${intersect_feature_motion_strain2} \
+  	    --direction=${direction} \
   	    --image_format=${image_format}
   	"""
 }
 
+/*
+ * Keeping longest fasta file (longest trajectory to generate genome for IGV viz)
+ */
 longest_fasta = out_fasta     
                    .max { it.size() }
 
-result_dir_distro = file("$baseDir/plots_distro$tag_res")
- 
-result_dir_distro.with {
-    if( !empty() ) { deleteDir() }
-    mkdirs()
-    println "Created: $result_dir_distro"
-}
+result_dir_IGV = file("results/igv")
 
-plots_pheno_feature_str1_str2.subscribe {
-	  it[0].copyTo( result_dir_distro.resolve ( it[1] + "." + it[2] + "." + it[3] + ".pdf" ) )   
-}
-
-/*
- * Creating folder to keep all files for data visualization on IGV
- */
-result_dir_IGV = file("results_IGV$tag_res")
-
-result_dir_IGV.with {
-    if( !empty() ) { deleteDir() }
-    mkdirs()
-    println "Created: $result_dir_IGV"
-} 
 
 longest_fasta.subscribe { 
     fasta_file = it[0]    
     fasta_file.copyTo ( result_dir_IGV.resolve ( "celegans.fa" ) )
 }
-
-
-result_dir_bed = file("results_bed$tag_res")
-
-/*
-result_dir_bed.with {
-    if( !empty() ) { deleteDir() }
-    mkdirs()
-    println "Created: $result_dir_bed"
-} 
-
-bed_loc_no_nas.subscribe {  
-    bed_file = it[0]
-    bed_file.copyTo ( result_dir_bed.resolve ( it[1] + "." + it[2] + ".bed" ) )
-}
-*/
-
-/*
-result_dir_bedGraph = file("results_bedGraph$tag_res")
-
-result_dir_bedGraph.with {
-    if( !empty() ) { deleteDir() }
-    mkdirs()
-    println "Created: $result_dir_bedGraph"
-} 
-*/
-/*
-bedGraph_loc_no_nas.subscribe {
-    bedGraph_file = it[0]
-    bedGraph_file.copyTo (result_dir_IGV.resolve ( it[1] + "." + it[2] + ".bedGraph" ) )
-}
-
-
-results_bedgr1_igv.subscribe {
-    it.copyTo (result_dir_IGV.resolve ( it[1] + "." + it[2] + ".bedGraph" ) )
-}
-*/
-
-results_bedgr1_igv.subscribe {
-    it.copyTo (result_dir_IGV)
-}
-
-results_bedgr2_igv.subscribe {
-    it.copyTo (result_dir_IGV)
-}
-
-/*
-results_bedgr1_igv.subscribe {
-    bedGraph_file = it[0]
-    bedGraph_file.copyTo (result_dir_IGV)
-}
-
-results_bedgr2_igv.subscribe {
-    bedGraph_file = it[0]
-    bedGraph_file.copyTo (result_dir_IGV)
-}
-*/
-
-result_dir_IGV_intersect = file("$result_dir_IGV/motion_intersected")
-
-result_dir_IGV_intersect.with {
-    if( !empty() ) { deleteDir() }
-    mkdirs()
-    println "Created:   $result_dir_IGV_intersect"
-} 
-
-bedGraph_intersect_loc_motion.subscribe {
-    bedGraph_file = it[0]
-    bedGraph_file.copyTo ( result_dir_IGV_intersect.resolve ( "intersect." + it[1] + "." + it[3] + "." + it[4] + ".bedGraph" ) )
-}
-
-bed_motion_wr.subscribe {
-    bed_direction = it[1]
-    bed_direction.copyTo ( result_dir_bed.resolve ( it[0] + "_" + it[2] + "_direction" + ".bed" ))
-}
-
-/*
-result_dir_csv = file("results_csv$tag_res")
-
-locomotion_files_wr.subscribe {
-    file_speed = it[0]
-    file_speed.copyTo ( result_dir_csv.resolve ( it[1] + ".csv" ) )
-}
-*/
-
-/*
-
-i=1
-for f in *N2*.csv
-do
-     echo -e "id\tframe_start\tframe_end\thead\theadTip\tmidbody\ttail\ttailTip\tforaging_speed\ttail_motion\tcrawling" > "N2_$i.csv"
-     cat $f | grep -v "#"  | sed 's/-10000/0/g' | awk -v i="$i" 'NR>1 {print "N2_"i"\t"$0}' >> "N2_$i.csv"
-     echo $i
-     i=$[$(echo $i) + 1]
-done
-
-i=1
-for f in *unc*.csv
-do
-     echo -e "id\tframe_start\tframe_end\thead\theadTip\tmidbody\ttail\ttailTip\tforaging_speed\ttail_motion\tcrawling" > "unc16_$i.csv"
-     cat $f | grep -v "#" | sed 's/-10000/0/g' | awk -v i="$i" 'NR>1 {print "unc16_"i"\t"$0}' >> "unc16_$i.csv"
-     echo $i
-     i=$[$(echo $i) + 1]
-done
-
-pergola -i ./*.csv -m ./worm_speed2pergola.txt -f bedGraph -w 1 -min 0 -max 29000
-
-awk '{ sum += $5; n++ } END { if (n > 0) print sum / n; }' mean_speed_i_motionDir.intersect.bed
-
-*/

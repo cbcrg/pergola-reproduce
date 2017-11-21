@@ -83,7 +83,7 @@ docker pull pergola/pergola@sha256:f7208e45e761dc0cfd3e3915237eb1a96eead6dfa9c8f
 Once data is downloaded, it is possible to reproduce all the paper results using this command:
 
 ```bash
-NXF_VER=0.24.3 nextflow run N2_vs_unc16_motions-Pergola-Reproduce.nf \ 
+NXF_VER=0.24.3 nextflow run celegans-Pergola-Reproduce.nf \ 
     --strain1_trackings 'data/unc_16/*.mat' \
     --strain2_trackings 'data/N2/*.mat' \
     --mappings_speed 'data/mappings/worms_speed2p.txt' \
