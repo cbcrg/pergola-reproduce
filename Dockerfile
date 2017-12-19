@@ -44,22 +44,22 @@ COPY pergola/README.md /pergola/
 
 RUN pip install -r /pergola/requirements.txt && \
     pip install cython && \
-    pip install h5py && \
+    # pip install h5py && \
     apt-get install -y python-scipy && \
     cd pergola && python setup.py install
 
 ## install R dependencies
 RUN apt-get update && \
     apt-get install --fix-missing -y \
-    gdebi-core \
+    # gdebi-core \
     pandoc \
     pandoc-citeproc \
     libcurl4-gnutls-dev \
-    libcairo2-dev/unstable \
+#    libcairo2-dev/unstable \
     libxt-dev \
     libssl-dev \
     libxml2-dev \
-    gfortran \
+#    gfortran \
     libhdf5-dev
 
 ## Install R packages
@@ -75,3 +75,4 @@ RUN R -e  'withr::with_libpaths(new = "/gviz/time", devtools::install_github("Jo
 ## version of Gviz modified to show fps instead of genomics units
 RUN R -e  'withr::with_libpaths(new = "/gviz/fps", devtools::install_github("JoseEspinosa/Gviz", ref = "fps"))'
 
+RUN pip install tables
