@@ -34,23 +34,26 @@ RUN apt-get update && \
     python-pip \
     bedtools
 
-RUN pip install pybedtools
+#RUN pip install pybedtools
 
+## DESCOMENTAR LO HE COMENTADO PARA QUE CADA VEZ QUE CAMBIE PERGOLA NO TEGAN QUE HACER EL BUILD ENTERO
 ## pergola installation
-COPY pergola/pergola /pergola/pergola
-COPY pergola/requirements.txt /pergola/
-COPY pergola/setup.py /pergola/
-COPY pergola/README.md /pergola/
+#COPY pergola/pergola /pergola/pergola
+#COPY pergola/requirements.txt /pergola/
+#COPY pergola/setup.py /pergola/
+#COPY pergola/README.md /pergola/
+## DESCOMENTAR LO HE COMENTADO PARA QUE CADA VEZ QUE CAMBIE PERGOLA NO TEGAN QUE HACER EL BUILD ENTERO
 
-RUN pip install -r /pergola/requirements.txt && \
-    pip install cython && \
-    # pip install h5py && \
-    apt-get install -y python-scipy && \
-    cd pergola && python setup.py install
+#RUN pip install -r /pergola/requirements.txt && \
+#    pip install cython && \
+#    # pip install h5py && \
+#    apt-get install -y python-scipy && \
+#    cd pergola && python setup.py install
+
 
 ## install R dependencies
 RUN apt-get update && \
-    apt-get install --fix-missing -y \
+	apt-get install --fix-missing -y \
     # gdebi-core \
     pandoc \
     pandoc-citeproc \
@@ -76,3 +79,66 @@ RUN R -e  'withr::with_libpaths(new = "/gviz/time", devtools::install_github("Jo
 RUN R -e  'withr::with_libpaths(new = "/gviz/fps", devtools::install_github("JoseEspinosa/Gviz", ref = "fps"))'
 
 RUN pip install tables
+
+COPY pergola/requirements.txt /pergola/
+RUN pip install -r /pergola/requirements.txt
+RUN pip install cython
+    # pip install h5py && \
+#RUN apt-get install -y python-scipy
+
+#RUN cd pergola && python setup.py install
+
+# I need this to avoid the broken package list apt
+RUN rm -rf /var/lib/apt/lists/* && \
+    apt-get update && \
+    apt-get install -y --no-install-recommends git \
+                                               libssl-dev \
+                                               openssl \
+                                               mysql-client-5.7 \
+                                               mysql-client-core-5.7 \
+                                               libmysqlclient-dev
+
+# Compile and install kentUtils
+RUN cd /tmp && \
+    git clone https://github.com/ENCODE-DCC/kentUtils.git && \
+    cd kentUtils && \
+    git checkout v302.1.0 && \
+    make && \
+    cp -rp bin/* /usr/local/bin && \
+    cd .. && rm -rf kentUtils
+
+# Compile and install bwtool
+RUN git clone https://github.com/CRG-Barcelona/libbeato.git && \
+    git clone https://github.com/CRG-Barcelona/bwtool.git && \
+    cd libbeato/  &&  ./configure && \
+    make && \
+    sudo make install && \
+    cd ../bwtool/  && ./configure && \
+    make && \
+    sudo make install
+
+# Install deeptools
+#RUN pip install deeptools==2.5.3
+RUN pip install deeptools==3.0.2
+
+# Reinstall pergola for avoid rebuild of everything
+#COPY pergola/pergola /pergola/pergola
+#COPY pergola/requirements.txt /pergola/
+#COPY pergola/setup.py /pergola/
+#COPY pergola/README.md /pergola/
+#
+#RUN cd pergola && python setup.py install
+
+RUN sudo apt-get install --fix-missing -y default-jdk
+
+RUN git clone --branch v1.15 https://github.com/jernst98/ChromHMM --single-branch
+
+# Update path with the scripts
+ENV PATH="/ChromHMM:${PATH}"
+
+COPY pergola/pergola /pergola/pergola
+COPY pergola/requirements.txt /pergola/
+COPY pergola/setup.py /pergola/
+COPY pergola/README.md /pergola/
+
+RUN cd pergola && python setup.py install
