@@ -1,5 +1,5 @@
-#  Copyright (c) 2014-2017, Centre for Genomic Regulation (CRG).
-#  Copyright (c) 2014-2017, Jose Espinosa-Carrasco and the respective authors.
+#  Copyright (c) 2014-2018, Centre for Genomic Regulation (CRG).
+#  Copyright (c) 2014-2018, Jose Espinosa-Carrasco and the respective authors.
 #
 #  This file is part of Pergola.
 #
@@ -34,35 +34,15 @@ RUN apt-get update && \
     python-pip \
     bedtools
 
-#RUN pip install pybedtools
-
-## DESCOMENTAR LO HE COMENTADO PARA QUE CADA VEZ QUE CAMBIE PERGOLA NO TEGAN QUE HACER EL BUILD ENTERO
-## pergola installation
-#COPY pergola/pergola /pergola/pergola
-#COPY pergola/requirements.txt /pergola/
-#COPY pergola/setup.py /pergola/
-#COPY pergola/README.md /pergola/
-## DESCOMENTAR LO HE COMENTADO PARA QUE CADA VEZ QUE CAMBIE PERGOLA NO TEGAN QUE HACER EL BUILD ENTERO
-
-#RUN pip install -r /pergola/requirements.txt && \
-#    pip install cython && \
-#    # pip install h5py && \
-#    apt-get install -y python-scipy && \
-#    cd pergola && python setup.py install
-
-
 ## install R dependencies
 RUN apt-get update && \
 	apt-get install --fix-missing -y \
-    # gdebi-core \
     pandoc \
     pandoc-citeproc \
     libcurl4-gnutls-dev \
-#    libcairo2-dev/unstable \
     libxt-dev \
     libssl-dev \
     libxml2-dev \
-#    gfortran \
     libhdf5-dev
 
 ## Install R packages
@@ -83,10 +63,6 @@ RUN pip install tables
 COPY pergola/requirements.txt /pergola/
 RUN pip install -r /pergola/requirements.txt
 RUN pip install cython
-    # pip install h5py && \
-#RUN apt-get install -y python-scipy
-
-#RUN cd pergola && python setup.py install
 
 # I need this to avoid the broken package list apt
 RUN rm -rf /var/lib/apt/lists/* && \
@@ -118,27 +94,23 @@ RUN git clone https://github.com/CRG-Barcelona/libbeato.git && \
     sudo make install
 
 # Install deeptools
-#RUN pip install deeptools==2.5.3
+# RUN pip install deeptools==2.5.7
 RUN pip install deeptools==3.0.2
 
-# Reinstall pergola for avoid rebuild of everything
-#COPY pergola/pergola /pergola/pergola
-#COPY pergola/requirements.txt /pergola/
-#COPY pergola/setup.py /pergola/
-#COPY pergola/README.md /pergola/
-#
-#RUN cd pergola && python setup.py install
-
+# Install java jdk and chromHMM 1.15
 RUN sudo apt-get install --fix-missing -y default-jdk
-
 RUN git clone --branch v1.15 https://github.com/jernst98/ChromHMM --single-branch
 
 # Update path with the scripts
 ENV PATH="/ChromHMM:${PATH}"
 
+# Install pergola
 COPY pergola/pergola /pergola/pergola
 COPY pergola/requirements.txt /pergola/
 COPY pergola/setup.py /pergola/
 COPY pergola/README.md /pergola/
 
 RUN cd pergola && python setup.py install
+
+# Reinstall matplotlib otherwise deeptools crashes
+RUN pip install matplotlib==2.0.2
