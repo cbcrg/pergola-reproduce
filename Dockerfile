@@ -133,7 +133,8 @@ RUN git clone https://github.com/dpryan79/libBigWig.git && \
     cd htslib && \
     make install && \
     cd .. && \
-    wget ftp://www.mirrorservice.org/sites/ftp.gnu.org/gnu/gsl/gsl-2.5.tar.gz && \
+    # wget ftp://www.mirrorservice.org/sites/ftp.gnu.org/gnu/gsl/gsl-2.5.tar.gz && \
+    wget ftp://ftp.gnu.org/gnu/gsl/gsl-2.5.tar.gz && \
     tar -xvzpf gsl-2.5.tar.gz && \
     cd gsl-2.5 && \
     ./configure && \
