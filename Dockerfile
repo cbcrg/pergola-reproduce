@@ -96,6 +96,15 @@ RUN git clone https://github.com/CRG-Barcelona/libbeato.git && \
 # Install deeptools
 # RUN pip install deeptools==2.5.7
 RUN pip install deeptools==3.0.2
+##########################
+# incorporate new version ##
+#RUN pip install deeptools==3.0.2
+RUN git clone --branch develop https://github.com/deeptools/deepTools.git --single-branch && \
+    cd deepTools && \
+    git fetch origin f57d5e6914699651591346ad876c1911c7598e00 && \
+    git reset --hard FETCH_HEAD && \
+    python setup.py install && \
+    cd ..
 
 # Install java jdk and chromHMM 1.15
 RUN sudo apt-get install --fix-missing -y default-jdk
@@ -114,3 +123,31 @@ RUN cd pergola && python setup.py install
 
 # Reinstall matplotlib otherwise deeptools crashes
 RUN pip install matplotlib==2.0.2
+
+# Install wiggletools
+RUN git clone https://github.com/dpryan79/libBigWig.git && \
+    cd libBigWig && \
+    make install && \
+    cd .. && \
+    git clone https://github.com/samtools/htslib.git && \
+    cd htslib && \
+    make install && \
+    cd .. && \
+    wget ftp://www.mirrorservice.org/sites/ftp.gnu.org/gnu/gsl/gsl-2.5.tar.gz && \
+    tar -xvzpf gsl-2.5.tar.gz && \
+    cd gsl-2.5 && \
+    ./configure && \
+    make && \
+    make install && \
+    cd .. && \
+    git clone https://github.com/Ensembl/WiggleTools.git && \
+    cd WiggleTools && \
+    make && \
+    cd ..
+
+RUN echo "export LD_LIBRARY_PATH=/usr/local/lib:$LD_LIBRARY_PATH" >> /root/.bashrc && \
+    /bin/bash -c "source /root/.bashrc"
+
+ENV PATH="/WiggleTools/bin:${PATH}"
+
+RUN R -e "devtools::install_version('ggplot2', version = \"2.2.1\", repos = \"http://cran.us.r-project.org\")"
