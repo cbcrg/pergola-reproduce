@@ -59,7 +59,6 @@ RUN R -e  'withr::with_libpaths(new = "/gviz/time", devtools::install_github("Jo
 RUN R -e  'withr::with_libpaths(new = "/gviz/fps", devtools::install_github("JoseEspinosa/Gviz", ref = "fps"))'
 
 RUN pip install tables
-
 COPY pergola/requirements.txt /pergola/
 RUN pip install -r /pergola/requirements.txt
 RUN pip install cython
@@ -95,16 +94,18 @@ RUN git clone https://github.com/CRG-Barcelona/libbeato.git && \
 
 # Install deeptools
 # RUN pip install deeptools==2.5.7
-RUN pip install deeptools==3.0.2
+#RUN pip install deeptools==3.0.2
 ##########################
 # incorporate new version ##
-#RUN pip install deeptools==3.0.2
-RUN git clone --branch develop https://github.com/deeptools/deepTools.git --single-branch && \
-    cd deepTools && \
-    git fetch origin f57d5e6914699651591346ad876c1911c7598e00 && \
-    git reset --hard FETCH_HEAD && \
-    python setup.py install && \
-    cd ..
+RUN pip install deeptools==3.1.1
+
+#RUN git clone --branch develop https://github.com/deeptools/deepTools.git --single-branch && \
+#    cd deepTools && \
+#    git fetch origin b4d8c24a62fa9c446b6f671157191aac27072852 && \ # version with shapes
+##    git fetch origin f57d5e6914699651591346ad876c1911c7598e00 && \ # version with plot pca working correctly
+#    git reset --hard FETCH_HEAD && \
+#    python setup.py install && \
+#    cd ..
 
 # Install java jdk and chromHMM 1.15
 RUN sudo apt-get install --fix-missing -y default-jdk
@@ -133,7 +134,6 @@ RUN git clone https://github.com/dpryan79/libBigWig.git && \
     cd htslib && \
     make install && \
     cd .. && \
-    # wget ftp://www.mirrorservice.org/sites/ftp.gnu.org/gnu/gsl/gsl-2.5.tar.gz && \
     wget ftp://ftp.gnu.org/gnu/gsl/gsl-2.5.tar.gz && \
     tar -xvzpf gsl-2.5.tar.gz && \
     cd gsl-2.5 && \
@@ -146,9 +146,10 @@ RUN git clone https://github.com/dpryan79/libBigWig.git && \
     make && \
     cd ..
 
-RUN echo "export LD_LIBRARY_PATH=/usr/local/lib:$LD_LIBRARY_PATH" >> /root/.bashrc && \
-    /bin/bash -c "source /root/.bashrc"
+#RUN echo "export LD_LIBRARY_PATH=/usr/local/lib:$LD_LIBRARY_PATH" >> /root/.bashrc && \
+#    /bin/bash -c "source /root/.bashrc"
 
 ENV PATH="/WiggleTools/bin:${PATH}"
 
+## This ggplot version guarantees that all plots are correctly produced
 RUN R -e "devtools::install_version('ggplot2', version = \"2.2.1\", repos = \"http://cran.us.r-project.org\")"
