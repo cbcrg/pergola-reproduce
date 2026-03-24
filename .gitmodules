@@ -1,3 +1,12 @@
 [submodule "pergola"]
 	path = pergola
 	url = git@github.com:cbcrg/pergola.git
+[submodule "mouse-pergola-reproduce"]
+	path = mouse-pergola-reproduce
+	url = https://github.com/cbcrg/mouse-pergola-reproduce.git
+[submodule "melanogaster-pergola-reproduce"]
+	path = melanogaster-pergola-reproduce
+	url = https://github.com/cbcrg/melanogaster-pergola-reproduce.git
+[submodule "celegans-pergola-reproduce"]
+	path = celegans-pergola-reproduce
+	url = https://github.com/cbcrg/celegans-pergola-reproduce.git

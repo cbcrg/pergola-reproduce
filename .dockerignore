@@ -1,11 +1,14 @@
 ## ignore nextflow files produced by nextflow execution
 
-## cb1_mice
-cb1_mice/work/*
-cb1_mice/files/*.*
+## mouse
+mouse-pergola-reproduce/work/*
+mouse-pergola-reproduce/files/*.*
 
 ## celegans
-celegans_n2_unc16/work/*
+celegans-pergola-reproduce/work/*
+
+## melanogaster
+melanogaster-pergola-reproduce
 
 # example delete
 # */temp*
